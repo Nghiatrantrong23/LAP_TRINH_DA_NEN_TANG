@@ -1,62 +1,102 @@
 import 'package:flutter/material.dart';
-import 'package:trek_bikes_app/login.dart';
-import 'package:trek_bikes_app/login_response.dart';
-import 'package:trek_bikes_app/member_repository.dart';
-import 'package:trek_bikes_app/session_helper.dart';
+
+import 'session_helper.dart';
 
 class LoginPage extends StatefulWidget {
-  final String _title;
-  const LoginPage({super.key, required this._title});
+  final SessionHelper session;
+  const LoginPage({super.key, required this.session});
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  String? _error;
+  final form = GlobalKey<FormState>();
+  final email = TextEditingController(), password = TextEditingController();
+  bool busy = false;
+  String? error;
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget._title)),
-      body: Form(
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-            ),
-            ElevatedButton.icon(onPressed: _login, label: Text('Login')),
-            if (_error != null && _error!.isNotEmpty) Text(_error!),
-          ],
-        ),
-      ),
-    );
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    super.dispose();
   }
 
-  void _login() async {
-    String email = _emailController.text.trim();
-    var obj = Login(email: email, password: _passwordController.text);
-    LoginResponse? result = await MemberRepository.login(obj);
-    if (result != null) {
-      if (result.success) {
-        await SessionHelper.save(email, result.token!);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Login Success')));
-        Navigator.pop(context, true);
-      }
-      setState(() {
-        _error = result.message;
-      });
-    } else {
-      setState(() {
-        _error = "Login Failed";
-      });
+  Future<void> login() async {
+    if (!form.currentState!.validate()) return;
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      await widget.session.login(email.text, password.text);
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) setState(() => error = e.toString());
+    } finally {
+      if (mounted) setState(() => busy = false);
     }
   }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Đăng nhập')),
+    body: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Form(
+            key: form,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(
+                  Icons.sports_tennis,
+                  size: 72,
+                  color: Color(0xff176448),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (v) =>
+                      (v ?? '').contains('@') ? null : 'Nhập email hợp lệ',
+                ),
+                TextFormField(
+                  controller: password,
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.password],
+                  decoration: const InputDecoration(labelText: 'Mật khẩu'),
+                  validator: (v) => (v ?? '').isEmpty ? 'Nhập mật khẩu' : null,
+                  onFieldSubmitted: (_) {
+                    if (!busy) login();
+                  },
+                ),
+                const SizedBox(height: 16),
+                if (error != null)
+                  Text(
+                    error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                FilledButton(
+                  onPressed: busy ? null : login,
+                  child: Text(busy ? 'Đang đăng nhập…' : 'Đăng nhập'),
+                ),
+                TextButton(
+                  onPressed: busy
+                      ? null
+                      : () => Navigator.pushNamed(context, '/register'),
+                  child: const Text('Tạo tài khoản mới'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

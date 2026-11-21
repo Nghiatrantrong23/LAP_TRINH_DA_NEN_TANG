@@ -1,12 +1,6 @@
 namespace WebApi.Models;
-
-public abstract class BaseProvider
+public abstract class BaseProvider(IHttpContextAccessor accessor)
 {
-    TrekBikesContext? context;
-    IHttpContextAccessor accessor;
-    public BaseProvider(IHttpContextAccessor accessor)
-    {
-        this.accessor = accessor;
-    }
-    protected TrekBikesContext Context => context ??= accessor.HttpContext!.RequestServices.GetRequiredService<TrekBikesContext>();
+    private SportsBookingContext? context;
+    protected SportsBookingContext Context => context ??= accessor.HttpContext!.RequestServices.GetRequiredService<SportsBookingContext>();
 }

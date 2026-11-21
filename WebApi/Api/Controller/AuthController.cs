@@ -1,51 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
-namespace WebApi.Api.Controllers;
-
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Razor.TagHelpers;
-using WebApi.Api.Controller;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using WebApi.Models;
-
-
-[ApiController, Route("api/[controller]")]
+namespace WebApi.Api.Controller;
+[ApiController,Route("api/auth")]
 public class AuthController : BaseController
 {
-    [HttpGet, Authorize]
-    public Member? GetMember()
-    {
-        string? id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!string.IsNullOrEmpty(id))
-        {
-            return Provider.Member.GetMember(id);
-        }
-        return null;
-    }
-    public int Register(Member obj)
-    {
-        if (ModelState.IsValid)
-        {
-            obj.Id = Guid.NewGuid().ToString().Replace("-", string.Empty);
-            obj.Password = BCrypt.Net.BCrypt.HashPassword(obj.Password);
-            return Provider.Member.Add(obj);
-        }
-        return -2;
-    }
-    public int Add(Member obj)
-    {
-        if (ModelState.IsValid)
-        {
-            obj.Id = Guid.NewGuid().ToString().Replace("-", string.Empty);
-            obj.Password = BCrypt.Net.BCrypt.HashPassword(obj.Password);
-            return Provider.Member.Add(obj);
-        }
-        return -2;
-    }
-
-[HttpPost("login")]
-    public LoginResponse? Login(LoginModel obj)
-    {
-        
-        return Provider.Member.Login(obj, HttpContext.RequestServices.GetRequiredService<IConfiguration>());
-    }
+    [HttpPost("register"),EnableRateLimiting("auth")]
+    public async Task<IActionResult> Register(RegisterModel model)=>StatusCode(201,await Provider.Auth.Register(model));
+    [HttpPost("login"),EnableRateLimiting("auth")]
+    public Task<LoginResponse> Login(LoginModel model)=>Provider.Auth.Login(model);
+    [HttpPost("refresh"),EnableRateLimiting("auth")]
+    public Task<LoginResponse> Refresh(RefreshModel model)=>Provider.Auth.Refresh(model.RefreshToken);
+    [HttpGet,Authorize]
+    [HttpGet("me")]
+    public Task<MemberDto> GetMember()=>Provider.Member.GetMember(MemberId);
+    [HttpPost("logout"),Authorize]
+    public async Task<IActionResult> Logout(){await Provider.Auth.Logout(MemberId,SessionId);return NoContent();}
+    [HttpPut("password"),Authorize]
+    public async Task<IActionResult> Password(ChangePasswordModel model){await Provider.Auth.ChangePassword(MemberId,model);return NoContent();}
 }

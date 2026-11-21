@@ -1,13 +1,19 @@
+import 'member.dart';
+
 class LoginResponse {
-  final bool success;
-  final String? token;
-  final String message;
-  LoginResponse({required this.success, this.token, required this.message});
-  factory LoginResponse.fromMap(Map<String, dynamic> map) {
-    return LoginResponse(
-      success: map['success'],
-      token: map['token'],
-      message: map['message'],
-    );
-  }
+  final String token, refreshToken;
+  final DateTime expiresAt;
+  final Member member;
+  const LoginResponse({
+    required this.token,
+    required this.refreshToken,
+    required this.expiresAt,
+    required this.member,
+  });
+  factory LoginResponse.fromMap(Map<String, dynamic> map) => LoginResponse(
+    token: map['token'],
+    refreshToken: map['refreshToken'],
+    expiresAt: DateTime.parse(map['expiresAt']),
+    member: Member.fromMap(map['member']),
+  );
 }

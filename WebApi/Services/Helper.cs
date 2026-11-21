@@ -1,63 +1,35 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Models;
-
 namespace WebApi.Services;
-
 public static class Helper
 {
-
-    public static string GenerateToken(Member member, IConfiguration configuration)
+    public static string NormalizeEmail(string email) => email.Trim().ToUpperInvariant();
+    public static string NewRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+    public static byte[] HashToken(string token) => SHA256.HashData(Encoding.UTF8.GetBytes(token));
+    public static void ValidatePassword(string password)
     {
-        List<Claim> claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, member.Id!),
-            new Claim(ClaimTypes.Name, string.IsNullOrEmpty(member.Surname) ? member.GivenName : member.Surname + " " + member.GivenName),
-            new Claim(ClaimTypes.Email, member.Email),
-            new Claim(ClaimTypes.GivenName, member.GivenName),
-            new Claim(ClaimTypes.Role, member.Role.ToString())
-        };
-        if(!string.IsNullOrEmpty(member.Surname)) claims.Add(new Claim(ClaimTypes.GivenName, member.Surname));
-        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Jwt:SecretKey"] ?? throw new KeyNotFoundException("Jwt:SecretKey")));
-
-        JwtSecurityToken token = new JwtSecurityToken(
-            issuer: configuration["Jwt:Issuer"],
-            audience: configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddDays(int.Parse(configuration["Jwt:Expires"] ?? throw new KeyNotFoundException("Jwt:Expires"))),
-            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
-        );
-        return handler.WriteToken(token);
+        if(password.Length<8 || Encoding.UTF8.GetByteCount(password)>72)
+            throw new BusinessException(400,"INVALID_PASSWORD","Mật khẩu cần ít nhất 8 ký tự và tối đa 72 byte UTF-8.");
     }
-    public static string RandomString(int len)
+    public static MemberDto ToDto(Member member) => new(member.Id,member.Email,member.GivenName,member.Surname,member.Phone,member.RoleId,member.Role.Name,member.IsLocked,member.EmailConfirmed,Convert.ToBase64String(member.RowVersion));
+    public static void RequireVersion(Member member,string version)
     {
-        string pattern = "01234567890abcdefghijklmnopqrstuvwxyz";
-        char[] arr = new char[len];
-        Random rand = new Random();
-        for(int i = 0; i < len; i++)
-        {
-            arr[i] = pattern[rand.Next(0, pattern.Length)];
-        }
-
-        return string.Join(string.Empty, arr);
+        if(version!=Convert.ToBase64String(member.RowVersion)) throw new BusinessException(409,"MEMBER_CHANGED","Thông tin vừa thay đổi. Vui lòng tải lại.");
     }
-    public static async Task<string> DownloadAsync(string url, string folder = "images", int len = 32)
+    public static LoginResponse Tokens(Member member,AuthSession session,string refresh,IConfiguration config)
     {
-        using(HttpClient client = new HttpClient())
-        {
-            using Stream stream = await client.GetStreamAsync(url);
-            string ext = Path.GetExtension(url);
-            string filename = RandomString(len - ext.Length) + ext;
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folder, filename);
-            using(FileStream fs = new FileStream(path, FileMode.Create))
-            {
-                stream.CopyTo(fs);
-            }
-            return filename;
-
-        }
+        var expires=DateTime.UtcNow.AddMinutes(config.GetValue<int>("Jwt:AccessMinutes",15));
+        var token=new JwtSecurityToken(config["Jwt:Issuer"],config["Jwt:Audience"],[
+            new Claim(ClaimTypes.NameIdentifier,member.Id.ToString()),
+            new Claim(ClaimTypes.Role,member.Role.Name),
+            new Claim("sid",session.Id.ToString()),
+            new Claim("securityVersion",member.SecurityVersion.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString("N"))
+        ],expires:expires,signingCredentials:new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SecretKey"]!)),SecurityAlgorithms.HmacSha256));
+        return new LoginResponse(true,"Đăng nhập thành công.",new JwtSecurityTokenHandler().WriteToken(token),refresh,expires,ToDto(member));
     }
 }

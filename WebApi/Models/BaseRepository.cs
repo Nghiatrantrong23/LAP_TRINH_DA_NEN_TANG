@@ -1,11 +1,5 @@
 namespace WebApi.Models;
-
-public abstract class BaseRepository
+public abstract class BaseRepository(SportsBookingContext context)
 {
-    protected TrekBikesContext context;
-
-    public BaseRepository(TrekBikesContext context)
-    {
-        this.context = context;
-    }
+    protected readonly SportsBookingContext context = context;
 }

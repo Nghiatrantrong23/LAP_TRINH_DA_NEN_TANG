@@ -1,18 +1,15 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.Models;
 
-[Table("Category")]
 public class Category
 {
-    [Column("CategoryId")]
-    public short Id { get; set; }
-    [Column("CategoryName")]
-    public string Name { get; set; } = null!;
-
-    public string Title { get; set; } = null!;
-
-    public string Description { get; set; } = null!;
-
-    public string Icon { get; set; } = null!;
+    public int Id { get; set; }
+    [MaxLength(100)] public string Name { get; set; } = "";
+    [MaxLength(1000)] public string? Description { get; set; }
+    [MaxLength(500)] public string? ImagePath { get; set; }
+    public int DisplayOrder { get; set; }
+    public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public byte[] RowVersion { get; set; } = [];
 }

@@ -1,39 +1,32 @@
 class Member {
-  final String? id;
-  final String email;
-  final String password;
-  final String givenName;
-  final String? surname;
-  final int role;
-
-  Member({
-    this.id,
+  final String id, email, givenName, surname, role, rowVersion;
+  final String? phone;
+  final int roleId;
+  final bool isLocked, emailConfirmed;
+  const Member({
+    required this.id,
     required this.email,
-    required this.password,
     required this.givenName,
-    this.surname,
+    required this.surname,
     required this.role,
+    required this.roleId,
+    required this.rowVersion,
+    this.phone,
+    this.isLocked = false,
+    this.emailConfirmed = false,
   });
-
-  Map<String, Object?> toMap() {
-    return {
-      'id': id,
-      'email': email,
-      'givenName': givenName,
-      'surname': surname,
-      'password': password,
-      'role': role,
-    };
-  }
-
-  factory Member.fromMap(Map<String, dynamic> map) {
-    return Member(
-      id: map['id'],
-      email: map['email'],
-      password: map['password'],
-      givenName: map['givenName'],
-      surname: map['surname'],
-      role: map['role'],
-    );
-  }
+  String get fullName => '$surname $givenName'.trim();
+  bool get isAdmin => role == 'Admin';
+  factory Member.fromMap(Map<String, dynamic> map) => Member(
+    id: map['id'],
+    email: map['email'],
+    givenName: map['givenName'],
+    surname: map['surname'],
+    role: map['role'],
+    roleId: map['roleId'],
+    rowVersion: map['rowVersion'],
+    phone: map['phone'],
+    isLocked: map['isLocked'],
+    emailConfirmed: map['emailConfirmed'],
+  );
 }

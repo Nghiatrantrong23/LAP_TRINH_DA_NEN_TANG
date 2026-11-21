@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WebApi.Models;
-public enum Role : short
+
+public class Role
 {
-Member,
-Customer,
-Admin
+    public short Id { get; set; }
+    [MaxLength(20)] public string Name { get; set; } = "";
 }

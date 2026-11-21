@@ -1,0 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+namespace WebApi.Models;
+public record RegisterModel([Required,EmailAddress,MaxLength(254)] string Email,[Required,MinLength(8),MaxLength(72)] string Password,[Required,MaxLength(50)] string GivenName,[MaxLength(50)] string Surname = "",[MaxLength(20)] string? Phone = null);
+public record LoginModel([Required,EmailAddress,MaxLength(254)] string Email,[Required,MaxLength(72)] string Password);
+public record RefreshModel([Required,MaxLength(200)] string RefreshToken);
+public record ChangePasswordModel([Required] string CurrentPassword,[Required,MinLength(8),MaxLength(72)] string NewPassword);
+public record UpdateProfileModel([Required,MaxLength(50)] string GivenName,[MaxLength(50)] string Surname,[MaxLength(20)] string? Phone,[Required] string RowVersion);
+public record UpdateRoleModel(short RoleId,[Required] string RowVersion);
+public record LockMemberModel(bool IsLocked,[Required] string RowVersion);
+public record MemberDto(Guid Id,string Email,string GivenName,string Surname,string? Phone,short RoleId,string Role,bool IsLocked,bool EmailConfirmed,string RowVersion);
+public record LoginResponse(bool Success,string Message,string Token,string RefreshToken,DateTime ExpiresAt,MemberDto Member);
+public record PageResult<T>(IReadOnlyList<T> Items,int PageIndex,int PageSize,int TotalItems,int TotalPages);

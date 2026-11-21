@@ -1,26 +1,10 @@
 namespace WebApi.Models;
-public class SiteProvider : BaseProvider
+public class SiteProvider(IHttpContextAccessor accessor, IConfiguration configuration) : BaseProvider(accessor)
 {
-    public SiteProvider(IHttpContextAccessor accessor) : base(accessor){}
-    CategoryRepository? category;
-    public CategoryRepository Category => category ??= new CategoryRepository(Context);
-    SubCategoryRepository? subCategory;
-    public SubCategoryRepository SubCategory => subCategory ??= new SubCategoryRepository(Context);
-    MemberRepository? member;
+    private MemberRepository? member;
+    private AuthRepository? auth;
+    private CategoryRepository? category;
     public MemberRepository Member => member ??= new MemberRepository(Context);
-    BikeRepository? bike;
-
-    public BikeRepository Bike => bike ??= new BikeRepository(Context);
-
-    CartRepository? cart;
-
-    public CartRepository Cart => cart ??= new CartRepository(Context);
-
-    InvoiceRepository? invoice;
-
-    public InvoiceRepository Invoice => invoice ??= new InvoiceRepository(Context);
-    
-    StatusRepository? status;
-    public StatusRepository Status => status ??= new StatusRepository(Context);
-
+    public AuthRepository Auth => auth ??= new AuthRepository(Context, configuration);
+    public CategoryRepository Category => category ??= new CategoryRepository(Context);
 }
