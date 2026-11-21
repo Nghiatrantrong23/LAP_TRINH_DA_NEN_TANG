@@ -1,8 +1,25 @@
-# SportBooking giai đoạn 2
+# SportBooking giai đoạn 3
 
-Database, dữ liệu mẫu, xác thực và phân quyền cho đề tài đặt sân thể thao và ghép kèo. Phát triển từ nguồn chuẩn `D:\LTDNT`, giữ cách tổ chức Controller → SiteProvider → Repository → DbContext. Flutter dùng các file đặt trực tiếp trong `lib`, không có thư mục Sports hoặc legacy. Backend dùng constructor thông thường, model/DTO dạng class riêng và hàm Controller có thân rõ ràng theo phong cách mẫu.
+Database, xác thực, phân quyền và quản lý danh mục/sân/dịch vụ cho đề tài đặt sân thể thao và ghép kèo. Phát triển từ nguồn chuẩn `D:\LTDNT`, giữ cách tổ chức Controller → SiteProvider → Repository → DbContext. Flutter dùng các file đặt trực tiếp trong `lib`, không có thư mục Sports hoặc legacy. Backend dùng constructor thông thường, model/DTO dạng class riêng và hàm Controller có thân rõ ràng theo phong cách mẫu.
 
-## Đã hoàn thành
+
+## Mới trong giai đoạn 3
+
+- Admin thêm, sửa, xóa danh mục; ảnh đại diện tùy chọn. Chặn xóa khi danh mục còn sản phẩm, kể cả sản phẩm đã ngừng hoạt động.
+- Admin quản lý sân và dịch vụ với tìm kiếm/phân trang. Sản phẩm mới bắt buộc upload ảnh; cập nhật có thể giữ ảnh cũ hoặc thay ảnh mới.
+- Cấu hình sức chứa, mặt sân, trong nhà/ngoài trời, giờ mở cửa và giá giờ vàng. Form hiện áp dụng cùng cấu hình cho bảy ngày trong tuần, mốc giờ theo bước 30 phút.
+- Chặn xóa sản phẩm có trong giỏ hoặc đơn, giữ lịch sử giá đã đặt. Sân có đơn chưa kết thúc không được ngừng hoạt động hoặc đổi giờ mở cửa, cơ sở, sức chứa.
+- Sản phẩm/danh mục ngừng hoạt động được ẩn khỏi API công khai; Admin vẫn xem và sửa được.
+- Các thao tác sửa/xóa dùng rowversion, ngăn ghi đè chỉnh sửa mới. Loại Court/Service không đổi sau khi tạo.
+- Ảnh PNG/JPEG/WebP tối đa 5 MB, kiểm tra chữ ký file, tên ngẫu nhiên và giới hạn đường dẫn trong thư mục upload.
+- Worker dọn ảnh chạy mỗi 5 giây. Xóa ảnh cũ được ghi cùng transaction cập nhật/xóa dữ liệu; lỗi I/O có backoff thử lại. Upload chưa được gắn vào bản ghi có job dọn sau 24 giờ để xử lý trường hợp tiến trình bị dừng đột ngột.
+- Khi cập nhật thất bại, ảnh mới được dọn bù; worker kiểm tra ảnh còn được tham chiếu trước khi xóa. Không xóa ảnh đang dùng.
+
+Đăng nhập Admin, chọn **Quản lý danh mục** hoặc **Quản lý sân & dịch vụ** trên trang chủ. Xem request/response tại [API-STAGE3.md](API-STAGE3.md). Mã vẫn theo Controller → SiteProvider → Repository → DbContext; Flutter dùng file trực tiếp trong lib.
+
+Giai đoạn 3 dùng các bảng đã tạo ở giai đoạn 2, không thay schema và không cần migration mới. File ảnh upload nằm trong `WebApi/wwwroot/uploads`, không được commit/đưa vào ZIP mã nguồn. Khi sao lưu dữ liệu triển khai, cần sao lưu database và thư mục ảnh cùng nhau.
+
+## Nền tảng giai đoạn 2 đã giữ lại
 
 - Migration EF Core đầu tiên và SQL script idempotent cho 23 bảng của thiết kế giai đoạn 1.
 - Database riêng `SportsBookingStage2`. Không thay đổi database TrekBikes hoặc bản SportBooking MVP trước đó.
@@ -148,6 +165,14 @@ Kiểm thử API cần API đang chạy tại localhost:5290 và cấu hình Adm
 
 Giới hạn auth là 40 yêu cầu/phút/IP cho đăng ký, đăng nhập và refresh. Khi chạy bộ kiểm thử nhiều lần liên tiếp, đợi sang cửa sổ một phút nếu nhận HTTP 429. Kiểm thử bao gồm schema, seed chạy lặp, refresh token đồng thời, phiên theo thiết bị, thu hồi phiên, phân quyền và rowversion.
 
+## Kiểm thử giai đoạn 3
+
+```powershell
+python tests\catalog_smoke.py
+```
+
+API cần đang chạy tại localhost:5290. Bộ kiểm thử dùng dữ liệu TEST3 theo mã lượt chạy, có fixture giỏ/đơn để kiểm tra ràng buộc và xác minh file ảnh vật lý. Script chỉ hỗ trợ database phát triển SportsBookingStage2; không chạy trên dữ liệu thật. Kết thúc sẽ dọn đúng bản ghi và ảnh của lượt chạy. Nếu bị ngắt, dùng `tests/catalog_fixture.ps1 -Mode Cleanup -RunTag <mã-lượt-10-ký-tự>` để dọn.
+
 ## Phạm vi tiếp theo
 
-Giai đoạn 3: CRUD danh mục, sân/dịch vụ và upload/xóa ảnh. Giai đoạn 4: danh sách sân, tìm kiếm, phân trang, lịch trống và giá. Sau đó triển khai giỏ, checkout, đơn hàng và ghép kèo. Stage2 mới tạo schema cho các module này, chưa công bố API đặt sân, thanh toán, QR hoặc ghép kèo. Email OTP cũng chưa triển khai.
+Giai đoạn 4 triển khai giao diện khách xem danh sách/chi tiết sân, tìm kiếm, phân trang và lịch trống. Sau đó triển khai giỏ, checkout chống trùng, đơn hàng, QR và ghép kèo. API đọc danh sách/chi tiết sản phẩm đã có để dùng tiếp; Stage3 chưa có giao diện đặt sân hoặc API checkout. Email OTP và thanh toán tự động cũng chưa triển khai.

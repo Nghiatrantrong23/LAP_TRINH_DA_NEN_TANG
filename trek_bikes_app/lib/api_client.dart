@@ -76,4 +76,74 @@ class ApiClient {
     }
     return data;
   }
+
+  Future<dynamic> upload(
+    String method,
+    String route,
+    Map<String, String> fields, {
+    List<int>? image,
+    String? filename,
+    bool retryAuth = true,
+  }) async {
+    final request = http.MultipartRequest(
+      method,
+      Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/api$route'),
+    );
+    request.fields.addAll(fields);
+    if (token != null) request.headers['authorization'] = 'Bearer $token';
+    if (image != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image',
+          image,
+          filename: filename ?? 'image.png',
+        ),
+      );
+    }
+    late http.Response response;
+    try {
+      response = await http.Response.fromStream(
+        await client.send(request).timeout(const Duration(seconds: 30)),
+      ).timeout(const Duration(seconds: 30));
+    } catch (_) {
+      throw ApiException('Không kết nối được máy chủ tại $baseUrl.');
+    }
+    if (response.statusCode == 401 &&
+        retryAuth &&
+        refreshSession != null &&
+        await refreshSession!()) {
+      return upload(
+        method,
+        route,
+        fields,
+        image: image,
+        filename: filename,
+        retryAuth: false,
+      );
+    }
+    dynamic data;
+    try {
+      data = response.body.isEmpty
+          ? null
+          : jsonDecode(utf8.decode(response.bodyBytes));
+    } catch (_) {
+      data = null;
+    }
+    if (response.statusCode >= 400) {
+      String message = data is Map
+          ? (data['title'] ?? 'Không lưu được dữ liệu.').toString()
+          : 'Không lưu được dữ liệu (${response.statusCode}).';
+      if (data is Map && data['errors'] is Map) {
+        message = (data['errors'] as Map).values
+            .expand((v) => v is List ? v : [v])
+            .join('\n');
+      }
+      throw ApiException(
+        message,
+        status: response.statusCode,
+        code: data is Map ? data['code'] : null,
+      );
+    }
+    return data;
+  }
 }

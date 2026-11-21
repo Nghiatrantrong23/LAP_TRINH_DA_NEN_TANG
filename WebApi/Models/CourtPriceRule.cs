@@ -5,37 +5,21 @@ namespace WebApi.Models;
 public class CourtPriceRule
 {
     public int Id
-    {
-        get; set;
-    }
+    { get; set; }
     public int CourtId
-    {
-        get; set;
-    }
+    { get; set; }
     public byte DayOfWeek
-    {
-        get; set;
-    }
+    { get; set; }
     public TimeOnly StartTime
-    {
-        get; set;
-    }
+    { get; set; }
     public TimeOnly EndTime
-    {
-        get; set;
-    }
+    { get; set; }
     public decimal PricePerHour
-    {
-        get; set;
-    }
+    { get; set; }
     public DateOnly EffectiveFrom
-    {
-        get; set;
-    }
+    { get; set; }
     public DateOnly? EffectiveTo
-    {
-        get; set;
-    }
+    { get; set; }
     public bool IsActive { get; set; } = true;
     public byte[] RowVersion { get; set; } = [];
 }

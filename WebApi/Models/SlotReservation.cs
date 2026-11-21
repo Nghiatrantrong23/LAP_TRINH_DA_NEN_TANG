@@ -5,11 +5,7 @@ namespace WebApi.Models;
 public class SlotReservation
 {
     public long CourtSlotId
-    {
-        get; set;
-    }
+    { get; set; }
     public long OrderItemId
-    {
-        get; set;
-    }
+    { get; set; }
 }

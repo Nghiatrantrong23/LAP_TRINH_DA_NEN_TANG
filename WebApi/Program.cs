@@ -18,6 +18,8 @@ builder.Services.AddDbContext<SportsBookingContext>(o => o.UseSqlServer(builder.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<SiteProvider>();
 builder.Services.AddControllers();
+builder.Services.AddSingleton<FileStorage>();
+builder.Services.AddHostedService<FileCleanupWorker>();
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? ["http://localhost:7360"]).AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddRateLimiter(o =>
 {
@@ -74,7 +76,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
-app.MapGet("/health", () => new { status = "ok", stage = 2 });
+app.MapGet("/health", () => new { status = "ok", stage = 3 });
 if (args.Contains("--init-db"))
 {
     using var scope = app.Services.CreateScope();

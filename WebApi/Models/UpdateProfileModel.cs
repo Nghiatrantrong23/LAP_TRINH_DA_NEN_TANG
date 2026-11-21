@@ -10,9 +10,7 @@ public class UpdateProfileModel
     public string Surname { get; set; } = string.Empty;
     [MaxLength(20)]
     public string? Phone
-    {
-        get; set;
-    }
+    { get; set; }
     [Required]
     public string RowVersion { get; set; } = string.Empty;
 }

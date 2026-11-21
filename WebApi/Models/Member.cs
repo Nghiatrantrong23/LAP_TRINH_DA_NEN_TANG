@@ -13,26 +13,16 @@ public class Member
     [MaxLength(254)] public string NormalizedEmail { get; set; } = "";
     [MaxLength(20)]
     public string? Phone
-    {
-        get; set;
-    }
+    { get; set; }
     [MaxLength(255)] public string PasswordHash { get; set; } = "";
     public bool IsLocked
-    {
-        get; set;
-    }
+    { get; set; }
     public bool EmailConfirmed
-    {
-        get; set;
-    }
+    { get; set; }
     public int SecurityVersion
-    {
-        get; set;
-    }
+    { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt
-    {
-        get; set;
-    }
+    { get; set; }
     public byte[] RowVersion { get; set; } = [];
 }

@@ -5,27 +5,15 @@ namespace WebApi.Models;
 public class CourtSchedule
 {
     public int Id
-    {
-        get; set;
-    }
+    { get; set; }
     public int CourtId
-    {
-        get; set;
-    }
+    { get; set; }
     public byte DayOfWeek
-    {
-        get; set;
-    }
+    { get; set; }
     public TimeOnly OpenTime
-    {
-        get; set;
-    }
+    { get; set; }
     public TimeOnly CloseTime
-    {
-        get; set;
-    }
+    { get; set; }
     public bool IsClosed
-    {
-        get; set;
-    }
+    { get; set; }
 }

@@ -5,9 +5,7 @@ namespace WebApi.Models;
 public class LockMemberModel
 {
     public bool IsLocked
-    {
-        get; set;
-    }
+    { get; set; }
     [Required]
     public string RowVersion { get; set; } = string.Empty;
 }

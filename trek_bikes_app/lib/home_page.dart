@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'session_helper.dart';
 import 'helper.dart';
+import 'catalog_image.dart';
 
 class HomePage extends StatefulWidget {
   final SessionHelper session;
@@ -119,6 +120,28 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   child: const Text('Quản lý thành viên'),
                                 ),
+                              if (member.isAdmin)
+                                FilledButton.tonal(
+                                  onPressed: () async {
+                                    await Navigator.pushNamed(
+                                      context,
+                                      '/admin/category',
+                                    );
+                                    if (mounted) setState(reload);
+                                  },
+                                  child: const Text('Quản lý danh mục'),
+                                ),
+                              if (member.isAdmin)
+                                FilledButton.tonal(
+                                  onPressed: () async {
+                                    await Navigator.pushNamed(
+                                      context,
+                                      '/admin/product',
+                                    );
+                                    if (mounted) setState(reload);
+                                  },
+                                  child: const Text('Quản lý sân & dịch vụ'),
+                                ),
                               TextButton(
                                 onPressed: () async {
                                   try {
@@ -152,7 +175,11 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         for (final c in value)
                           ListTile(
-                            leading: const Icon(Icons.sports),
+                            leading: CatalogImage(
+                              api: widget.session.api,
+                              path: c['imagePath'],
+                              size: 42,
+                            ),
                             title: Text(c['name']),
                           ),
                       ],

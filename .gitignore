@@ -24,3 +24,5 @@ LOCAL-ADMIN.txt
 *.keystore
 **/key.properties
 .vscode/
+
+WebApi/wwwroot/uploads/

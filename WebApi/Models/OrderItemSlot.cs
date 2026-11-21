@@ -5,15 +5,9 @@ namespace WebApi.Models;
 public class OrderItemSlot
 {
     public long OrderItemId
-    {
-        get; set;
-    }
+    { get; set; }
     public long CourtSlotId
-    {
-        get; set;
-    }
+    { get; set; }
     public decimal UnitPrice
-    {
-        get; set;
-    }
+    { get; set; }
 }

@@ -14,7 +14,5 @@ public class RegisterModel
     public string Surname { get; set; } = string.Empty;
     [MaxLength(20)]
     public string? Phone
-    {
-        get; set;
-    }
+    { get; set; }
 }

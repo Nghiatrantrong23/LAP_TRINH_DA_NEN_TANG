@@ -5,33 +5,19 @@ namespace WebApi.Models;
 public class CourtSlot
 {
     public long Id
-    {
-        get; set;
-    }
+    { get; set; }
     public int CourtId
-    {
-        get; set;
-    }
+    { get; set; }
     public DateOnly PlayDate
-    {
-        get; set;
-    }
+    { get; set; }
     public TimeOnly StartTime
-    {
-        get; set;
-    }
+    { get; set; }
     public TimeOnly EndTime
-    {
-        get; set;
-    }
+    { get; set; }
     public bool IsBlocked
-    {
-        get; set;
-    }
+    { get; set; }
     [MaxLength(300)]
     public string? BlockReason
-    {
-        get; set;
-    }
+    { get; set; }
     public byte[] RowVersion { get; set; } = [];
 }

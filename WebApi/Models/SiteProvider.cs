@@ -1,3 +1,5 @@
+using WebApi.Services;
+
 namespace WebApi.Models;
 
 public class SiteProvider : BaseProvider
@@ -6,13 +8,17 @@ public class SiteProvider : BaseProvider
     private MemberRepository? member;
     private AuthRepository? auth;
     private CategoryRepository? category;
+    private ProductRepository? product;
+    private readonly FileStorage images;
 
-    public SiteProvider(IHttpContextAccessor accessor, IConfiguration configuration) : base(accessor)
+    public SiteProvider(IHttpContextAccessor accessor, IConfiguration configuration, FileStorage images) : base(accessor)
     {
         this.configuration = configuration;
+        this.images = images;
     }
 
     public MemberRepository Member => member ??= new MemberRepository(Context);
     public AuthRepository Auth => auth ??= new AuthRepository(Context, configuration);
-    public CategoryRepository Category => category ??= new CategoryRepository(Context);
+    public CategoryRepository Category => category ??= new CategoryRepository(Context, images);
+    public ProductRepository Product => product ??= new ProductRepository(Context, images);
 }

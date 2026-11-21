@@ -5,28 +5,18 @@ namespace WebApi.Models;
 public class MemberDto
 {
     public Guid Id
-    {
-        get; set;
-    }
+    { get; set; }
     public string Email { get; set; } = string.Empty;
     public string GivenName { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;
     public string? Phone
-    {
-        get; set;
-    }
+    { get; set; }
     public short RoleId
-    {
-        get; set;
-    }
+    { get; set; }
     public string Role { get; set; } = string.Empty;
     public bool IsLocked
-    {
-        get; set;
-    }
+    { get; set; }
     public bool EmailConfirmed
-    {
-        get; set;
-    }
+    { get; set; }
     public string RowVersion { get; set; } = string.Empty;
 }

@@ -6,24 +6,14 @@ public class CheckInToken
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrderId
-    {
-        get; set;
-    }
+    { get; set; }
     [MaxLength(32)] public byte[] TokenHash { get; set; } = [];
     public DateTime ExpiresAt
-    {
-        get; set;
-    }
+    { get; set; }
     public DateTime? UsedAt
-    {
-        get; set;
-    }
+    { get; set; }
     public DateTime? RevokedAt
-    {
-        get; set;
-    }
+    { get; set; }
     public Guid? UsedByMemberId
-    {
-        get; set;
-    }
+    { get; set; }
 }
