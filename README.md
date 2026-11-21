@@ -1,6 +1,6 @@
 # SportBooking giai đoạn 2
 
-Database, dữ liệu mẫu, xác thực và phân quyền cho đề tài đặt sân thể thao và ghép kèo. Phát triển từ nguồn chuẩn `D:\LTDNT`, giữ cách tổ chức Controller → SiteProvider → Repository → DbContext. Flutter dùng các file đặt trực tiếp trong `lib`, không có thư mục Sports hoặc legacy.
+Database, dữ liệu mẫu, xác thực và phân quyền cho đề tài đặt sân thể thao và ghép kèo. Phát triển từ nguồn chuẩn `D:\LTDNT`, giữ cách tổ chức Controller → SiteProvider → Repository → DbContext. Flutter dùng các file đặt trực tiếp trong `lib`, không có thư mục Sports hoặc legacy. Backend dùng constructor thông thường, model/DTO dạng class riêng và hàm Controller có thân rõ ràng theo phong cách mẫu.
 
 ## Đã hoàn thành
 
@@ -74,7 +74,7 @@ WebApi/
     AuthRepository.cs
     MemberRepository.cs
     CategoryRepository.cs
-    AuthModels.cs
+    RegisterModel.cs, LoginModel.cs, LoginResponse.cs, ...
     Member.cs, Role.cs, AuthSession.cs, ...
   Services/
     Helper.cs
@@ -103,7 +103,7 @@ trek_bikes_app/lib/
 
 `AuthController.Register` gọi `Provider.Auth.Register`; `AdminMemberController` gọi `Provider.Member`; các Repository nhận `SportsBookingContext` qua `BaseRepository`. Helper xử lý token, chuẩn hóa email và DTO; không thay Repository bằng tầng nghiệp vụ khác.
 
-Các file xe đạp không dùng trong bản Stage2 đã được loại khỏi bản làm việc. Nguồn chuẩn `D:\LTDNT` và lịch sử Git gốc vẫn giữ để đối chiếu. `TrekBikes.sql` là script mẫu tham khảo; `SportsBooking.sql` là schema mới.
+Các file xe đạp không dùng trong bản Stage2 đã được loại khỏi bản làm việc. Mã nguồn được cập nhật trực tiếp tại `D:\LTDNT`; bản gốc trước cập nhật đã sao lưu trong `Documents\SportBooking-Update`. Lịch sử Git gốc vẫn giữ để đối chiếu. `TrekBikes.sql` là script mẫu tham khảo; `SportsBooking.sql` là schema mới.
 
 ## Database và migration
 

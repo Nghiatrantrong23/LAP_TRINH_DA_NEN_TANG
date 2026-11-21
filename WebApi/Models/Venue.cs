@@ -4,7 +4,10 @@ namespace WebApi.Models;
 
 public class Venue
 {
-    public int Id { get; set; }
+    public int Id
+    {
+        get; set;
+    }
     [MaxLength(150)] public string Name { get; set; } = "";
     [MaxLength(300)] public string Address { get; set; } = "";
     [MaxLength(20)] public string Phone { get; set; } = "";

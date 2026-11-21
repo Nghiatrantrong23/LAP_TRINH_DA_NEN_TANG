@@ -3,20 +3,40 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using WebApi.Models;
 namespace WebApi.Api.Controller;
-[ApiController,Route("api/auth")]
+[ApiController, Route("api/auth")]
 public class AuthController : BaseController
 {
-    [HttpPost("register"),EnableRateLimiting("auth")]
-    public async Task<IActionResult> Register(RegisterModel model)=>StatusCode(201,await Provider.Auth.Register(model));
-    [HttpPost("login"),EnableRateLimiting("auth")]
-    public Task<LoginResponse> Login(LoginModel model)=>Provider.Auth.Login(model);
-    [HttpPost("refresh"),EnableRateLimiting("auth")]
-    public Task<LoginResponse> Refresh(RefreshModel model)=>Provider.Auth.Refresh(model.RefreshToken);
-    [HttpGet,Authorize]
+    [HttpPost("register"), EnableRateLimiting("auth")]
+    public async Task<IActionResult> Register(RegisterModel model)
+    {
+        return StatusCode(201, await Provider.Auth.Register(model));
+    }
+    [HttpPost("login"), EnableRateLimiting("auth")]
+    public Task<LoginResponse> Login(LoginModel model)
+    {
+        return Provider.Auth.Login(model);
+    }
+    [HttpPost("refresh"), EnableRateLimiting("auth")]
+    public Task<LoginResponse> Refresh(RefreshModel model)
+    {
+        return Provider.Auth.Refresh(model.RefreshToken);
+    }
+    [HttpGet, Authorize]
     [HttpGet("me")]
-    public Task<MemberDto> GetMember()=>Provider.Member.GetMember(MemberId);
-    [HttpPost("logout"),Authorize]
-    public async Task<IActionResult> Logout(){await Provider.Auth.Logout(MemberId,SessionId);return NoContent();}
-    [HttpPut("password"),Authorize]
-    public async Task<IActionResult> Password(ChangePasswordModel model){await Provider.Auth.ChangePassword(MemberId,model);return NoContent();}
+    public Task<MemberDto> GetMember()
+    {
+        return Provider.Member.GetMember(MemberId);
+    }
+    [HttpPost("logout"), Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        await Provider.Auth.Logout(MemberId, SessionId);
+        return NoContent();
+    }
+    [HttpPut("password"), Authorize]
+    public async Task<IActionResult> Password(ChangePasswordModel model)
+    {
+        await Provider.Auth.ChangePassword(MemberId, model);
+        return NoContent();
+    }
 }
