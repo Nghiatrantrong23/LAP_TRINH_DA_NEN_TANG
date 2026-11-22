@@ -1,0 +1,20 @@
+using Microsoft.EntityFrameworkCore;
+namespace WebApi.Models;
+public class TrekBikesContext : DbContext
+{
+    public TrekBikesContext(DbContextOptions options) : base(options){}
+    public DbSet<Category> Categories { get; set; } = null!;
+    public DbSet<SubCategory> SubCategories { get; set; } = null!;
+    public DbSet<Member> Members { get; set; } = null!;
+    public DbSet<Bike> Bikes {get; set;}
+    public DbSet<Cart> Carts{get;set;}
+    public DbSet<Status> Statuses { get; set; }
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<InvoiceDetail> InvoiceDetails { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<InvoiceDetail>().HasKey(p => new { p.InvoiceId, p.BikeId });
+    }
+}
