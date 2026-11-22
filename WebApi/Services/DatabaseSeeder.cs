@@ -107,6 +107,7 @@ public static class DatabaseSeeder
                 var o1 = new Order
                 {
                     Id = Guid.NewGuid(),
+                    IdempotencyKey = Guid.NewGuid().ToString("N"),
                     OrderCode = "DH-20261122-001",
                     MemberId = adminMember.Id,
                     VenueId = venue.Id,
@@ -158,6 +159,7 @@ public static class DatabaseSeeder
                 var o2 = new Order
                 {
                     Id = Guid.NewGuid(),
+                    IdempotencyKey = Guid.NewGuid().ToString("N"),
                     OrderCode = "DH-20261122-002",
                     MemberId = adminMember.Id,
                     VenueId = venue.Id,
