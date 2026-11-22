@@ -1,9 +1,47 @@
-# SportBooking giai đoạn 3
+# SportBooking — Ứng dụng Đặt sân thể thao Đa nền tảng
 
-Database, xác thực, phân quyền và quản lý danh mục/sân/dịch vụ cho đề tài đặt sân thể thao và ghép kèo. Phát triển từ nguồn chuẩn `D:\LTDNT`, giữ cách tổ chức Controller → SiteProvider → Repository → DbContext. Flutter dùng các file đặt trực tiếp trong `lib`, không có thư mục Sports hoặc legacy. Backend dùng constructor thông thường, model/DTO dạng class riêng và hàm Controller có thân rõ ràng theo phong cách mẫu.
+Ứng dụng đặt sân thể thao hoàn chỉnh phát triển trên nền tảng **ASP.NET Core 8 Web API** và **Flutter (Dart 3.13)**. 
+Dự án được hợp nhất và tổ chức theo kiến trúc chuẩn: Controller → SiteProvider → Repository → DbContext.
 
+---
 
-## Mới trong giai đoạn 3
+## Cấu trúc thư mục dự án
+
+```text
+D:\LTDNT\
+├── WebApi/                  # Backend ASP.NET Core 8 Web API (chạy port 5290)
+│   ├── Api/Controller/      # Các Controller (Auth, Admin, Sân bãi, Đơn hàng)
+│   ├── Models/              # DbContext, Entities, Repositories, DTOs
+│   └── Services/            # EmailService, DatabaseSeeder, FileStorage
+│
+├── trek_bikes_app/          # Frontend Flutter Mobile/Web
+│   └── lib/                 # Toàn bộ mã nguồn UI, Model, Repo (xem trek_bikes_app/lib/README.md)
+│
+├── database/                # Scripts cơ sở dữ liệu
+│   ├── SportsBooking.sql    # Schema database SportsBookingStage2
+│   └── TrekBikes.sql        # Schema Trek Bikes gốc
+│
+├── docs/                    # Tài liệu và báo cáo tích hợp
+│   ├── INTEGRATION_REPORT.md # Báo cáo chi tiết đối chiếu 31 chức năng rubric
+│   ├── API-STAGE2.md        # Tài liệu API xác thực & tài khoản
+│   └── API-STAGE3.md        # Tài liệu API danh mục & sân bãi
+│
+├── _references/             # Mã nguồn tham khảo từ các nhóm và PR trước
+│   ├── Nhom_xac_thuc_nguoi_dung/ # Tham khảo Social Login, OTP
+│   └── Nhom_quan_ly_don_hang/    # Tham khảo nghiệp vụ đơn hàng Trek Bikes gốc
+│
+├── tests/                   # Các kịch bản kiểm thử tự động
+├── setup.ps1                # Script khởi tạo nhanh môi trường và database
+└── README.md
+```
+
+---
+
+## Mới trong giai đoạn 3 & Tích hợp Quản lý đơn hàng
+
+- **Quản lý đơn hàng (Admin)**: Hiển thị danh sách đơn, xem chi tiết, tìm kiếm theo tên/SĐT/mã đơn, lọc theo ngày, lọc theo trạng thái (`PendingDeposit`, `Confirmed`, `Playing`, `Completed`, `Cancelled`), cập nhật trạng thái có lưu vết lịch sử `OrderStatusHistory`.
+- **Admin danh mục & sân bãi**: Thêm, sửa, xóa danh mục; upload ảnh sân; thiết lập sức chứa, giờ mở cửa, giá giờ vàng theo khung giờ.
+- **Xác thực JWT + Refresh Token**: Đăng nhập, đăng ký, đổi mật khẩu, phân quyền Member/Admin.
 
 - Admin thêm, sửa, xóa danh mục; ảnh đại diện tùy chọn. Chặn xóa khi danh mục còn sản phẩm, kể cả sản phẩm đã ngừng hoạt động.
 - Admin quản lý sân và dịch vụ với tìm kiếm/phân trang. Sản phẩm mới bắt buộc upload ảnh; cập nhật có thể giữ ảnh cũ hoặc thay ảnh mới.
