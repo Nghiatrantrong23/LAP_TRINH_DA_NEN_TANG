@@ -95,6 +95,97 @@ public static class DatabaseSeeder
             }
             await db.SaveChangesAsync();
         }
+        if (!await db.Orders.AnyAsync())
+        {
+            var adminMember = await db.Members.FirstOrDefaultAsync();
+            var court = await db.Products.FirstOrDefaultAsync(p => p.Type == "Court");
+            var service = await db.Products.FirstOrDefaultAsync(p => p.Type == "Service");
+            // venue đã được khai báo ở outer scope (line 39) — dùng lại
+
+            if (adminMember != null && court != null && venue != null)
+            {
+                var o1 = new Order
+                {
+                    Id = Guid.NewGuid(),
+                    OrderCode = "DH-20261122-001",
+                    MemberId = adminMember.Id,
+                    VenueId = venue.Id,
+                    BookingDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                    CustomerName = "Nguyễn Văn An",
+                    CustomerPhone = "0901234567",
+                    Status = "Confirmed",
+                    TotalAmount = 350000m,
+                    DepositAmount = 100000m,
+                    Note = "Đặt sân thi đấu buổi tối",
+                    CreatedAt = DateTime.UtcNow.AddHours(-3)
+                };
+                db.Orders.Add(o1);
+                db.OrderItems.Add(new OrderItem
+                {
+                    OrderId = o1.Id,
+                    ProductId = court.Id,
+                    ProductName = court.Name,
+                    ProductType = "Court",
+                    Unit = "Giờ",
+                    Quantity = 2,
+                    UnitPrice = 150000m,
+                    LineTotal = 300000m
+                });
+                if (service != null)
+                {
+                    db.OrderItems.Add(new OrderItem
+                    {
+                        OrderId = o1.Id,
+                        ProductId = service.Id,
+                        ProductName = service.Name,
+                        ProductType = "Service",
+                        Unit = "Lượt",
+                        Quantity = 1,
+                        UnitPrice = 50000m,
+                        LineTotal = 50000m
+                    });
+                }
+                db.OrderStatusHistories.Add(new OrderStatusHistory
+                {
+                    OrderId = o1.Id,
+                    FromStatus = "PendingDeposit",
+                    ToStatus = "Confirmed",
+                    ChangedByMemberId = adminMember.Id,
+                    Reason = "Khách đã chuyển cọc 100.000đ qua VietQR",
+                    CreatedAt = DateTime.UtcNow.AddHours(-2)
+                });
+
+                var o2 = new Order
+                {
+                    Id = Guid.NewGuid(),
+                    OrderCode = "DH-20261122-002",
+                    MemberId = adminMember.Id,
+                    VenueId = venue.Id,
+                    BookingDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+                    CustomerName = "Trần Thị Bích",
+                    CustomerPhone = "0912345678",
+                    Status = "PendingDeposit",
+                    TotalAmount = 200000m,
+                    DepositAmount = 0m,
+                    Note = "Chờ chuyển cọc trong 15 phút",
+                    CreatedAt = DateTime.UtcNow.AddMinutes(-10)
+                };
+                db.Orders.Add(o2);
+                db.OrderItems.Add(new OrderItem
+                {
+                    OrderId = o2.Id,
+                    ProductId = court.Id,
+                    ProductName = court.Name,
+                    ProductType = "Court",
+                    Unit = "Giờ",
+                    Quantity = 1,
+                    UnitPrice = 200000m,
+                    LineTotal = 200000m
+                });
+
+                await db.SaveChangesAsync();
+            }
+        }
         await db.SaveChangesAsync();
         await tx.CommitAsync();
     }

@@ -142,6 +142,14 @@ class _HomePageState extends State<HomePage> {
                                   },
                                   child: const Text('Quản lý sân & dịch vụ'),
                                 ),
+                              if (member.isAdmin)
+                                FilledButton.tonal(
+                                  onPressed: () => Navigator.pushNamed(
+                                    context,
+                                    '/admin/order',
+                                  ),
+                                  child: const Text('Quản lý đơn hàng'),
+                                ),
                               TextButton(
                                 onPressed: () async {
                                   try {

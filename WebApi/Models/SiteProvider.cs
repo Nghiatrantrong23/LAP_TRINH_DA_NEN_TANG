@@ -9,6 +9,7 @@ public class SiteProvider : BaseProvider
     private AuthRepository? auth;
     private CategoryRepository? category;
     private ProductRepository? product;
+    private OrderRepository? order;
     private readonly FileStorage images;
 
     public SiteProvider(IHttpContextAccessor accessor, IConfiguration configuration, FileStorage images) : base(accessor)
@@ -21,4 +22,5 @@ public class SiteProvider : BaseProvider
     public AuthRepository Auth => auth ??= new AuthRepository(Context, configuration);
     public CategoryRepository Category => category ??= new CategoryRepository(Context, images);
     public ProductRepository Product => product ??= new ProductRepository(Context, images);
+    public OrderRepository Order => order ??= new OrderRepository(Context);
 }
