@@ -77,6 +77,10 @@ class _HomePageState extends State<HomePage> {
     await Navigator.pushNamed(context, '/admin/roles');
   }
 
+  void _onOrderManagement() async {
+    await Navigator.pushNamed(context, '/admin/orders');
+  }
+
   void _onChangePassword() async {
     await Navigator.pushNamed(context, '/change-password');
   }
@@ -172,6 +176,17 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
               ),
               const SizedBox(height: 10),
+              Card(
+                elevation: 2,
+                child: ListTile(
+                  leading: const CircleAvatar(backgroundColor: Colors.deepOrange, child: Icon(Icons.receipt_long, color: Colors.white)),
+                  title: const Text('Quản lý đơn hàng (Orders)', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Xem danh sách, tìm kiếm, lọc theo ngày và cập nhật trạng thái đơn'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: _onOrderManagement,
+                ),
+              ),
+              const SizedBox(height: 8),
               Card(
                 elevation: 2,
                 child: ListTile(

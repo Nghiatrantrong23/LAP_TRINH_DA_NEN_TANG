@@ -5,6 +5,7 @@ import 'package:sport_booking_app/pages/forgot_password_page.dart';
 import 'package:sport_booking_app/pages/home_page.dart';
 import 'package:sport_booking_app/pages/login_page.dart';
 import 'package:sport_booking_app/pages/member_management_page.dart';
+import 'package:sport_booking_app/pages/order_management_page.dart';
 import 'package:sport_booking_app/pages/profile_page.dart';
 import 'package:sport_booking_app/pages/register_page.dart';
 import 'package:sport_booking_app/pages/role_management_page.dart';
@@ -46,6 +47,7 @@ class SportBookingApp extends StatelessWidget {
         '/profile': (context) => const ProfilePage(title: 'Hồ sơ cá nhân'),
         '/admin/members': (context) => const MemberManagementPage(title: 'Quản lý thành viên'),
         '/admin/roles': (context) => const RoleManagementPage(title: 'Quản lý vai trò (Roles)'),
+        '/admin/orders': (context) => const OrderManagementPage(title: 'Quản lý đơn hàng (Admin)'),
       },
     );
   }

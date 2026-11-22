@@ -10,6 +10,9 @@ public class DatSanTheThaoContext : DbContext
     public DbSet<ThanhVien> ThanhViens { get; set; } = null!;
     public DbSet<PhienDangNhap> PhienDangNhaps { get; set; } = null!;
     public DbSet<MaXacThucEmail> MaXacThucEmails { get; set; } = null!;
+    public DbSet<DonHang> DonHangs { get; set; } = null!;
+    public DbSet<ChiTietDonHang> ChiTietDonHangs { get; set; } = null!;
+    public DbSet<LichSuTrangThaiDon> LichSuTrangThaiDons { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +31,11 @@ public class DatSanTheThaoContext : DbContext
         modelBuilder.Entity<PhienDangNhap>(entity =>
         {
             entity.HasIndex(p => p.RefreshTokenHash).IsUnique();
+        });
+
+        modelBuilder.Entity<DonHang>(entity =>
+        {
+            entity.HasIndex(p => p.SoDonHang).IsUnique();
         });
     }
 }

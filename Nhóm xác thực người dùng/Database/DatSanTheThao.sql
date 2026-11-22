@@ -472,3 +472,65 @@ DECLARE @HomNay DATE = CAST(GETDATE() AS DATE);
 EXEC sp_TaoOLichSan @NgayBatDau = @HomNay, @SoNgayToi = 14;
 GO
 
+-- ============================================================
+-- K. DỮ LIỆU MẪU ĐƠN HÀNG (SEED DATA DON HANG CHO ADMIN)
+-- ============================================================
+DECLARE @AdminId UNIQUEIDENTIFIER = 'A0000000-0000-0000-0000-000000000001';
+DECLARE @MemberId UNIQUEIDENTIFIER = 'B0000000-0000-0000-0000-000000000001';
+
+-- Đơn hàng 1: Chờ cọc (ChoCoc)
+DECLARE @DH1 UNIQUEIDENTIFIER = 'C0000000-0000-0000-0000-000000000001';
+INSERT INTO DonHang (MaDonHang, SoDonHang, MaThanhVien, MaCoSo, NgayDatChoi, TenKhachHang, SoDienThoaiKhach, TrangThai, TongTien, TienCoc, GiuChoDen, GhiChu, KhoaChongTrung, RequestHash, NgayTao)
+VALUES (@DH1, 'DH-20261122-001', @MemberId, 1, CAST(GETDATE() AS DATE), N'Nguyễn Văn A', '0987654321', 'ChoCoc', 160000, 0, DATEADD(MINUTE, 30, SYSUTCDATETIME()), N'Khách hẹn chuyển khoản cọc trong 30 phút', 'KEY-DH-001', HASHBYTES('SHA2_256', 'DH-001'), SYSUTCDATETIME());
+
+INSERT INTO ChiTietDonHang (MaDonHang, MaSanPham, TenSanPham, LoaiSanPham, DonViTinh, SoLuong, DonGia, ThanhTien)
+VALUES (@DH1, 1, N'Sân Cầu Lông 01', 'San', N'giờ', 2, 80000, 160000);
+
+-- Đơn hàng 2: Đã xác nhận (DaXacNhan)
+DECLARE @DH2 UNIQUEIDENTIFIER = 'C0000000-0000-0000-0000-000000000002';
+INSERT INTO DonHang (MaDonHang, SoDonHang, MaThanhVien, MaCoSo, NgayDatChoi, TenKhachHang, SoDienThoaiKhach, TrangThai, TongTien, TienCoc, GiuChoDen, GhiChu, KhoaChongTrung, RequestHash, NgayTao)
+VALUES (@DH2, 'DH-20261122-002', @MemberId, 1, CAST(GETDATE() AS DATE), N'Trần Minh Tâm', '0912345678', 'DaXacNhan', 300000, 150000, NULL, N'Đã cọc 50% qua Momo', 'KEY-DH-002', HASHBYTES('SHA2_256', 'DH-002'), DATEADD(HOUR, -2, SYSUTCDATETIME()));
+
+INSERT INTO ChiTietDonHang (MaDonHang, MaSanPham, TenSanPham, LoaiSanPham, DonViTinh, SoLuong, DonGia, ThanhTien)
+VALUES 
+    (@DH2, 2, N'Sân Pickleball VIP 01', 'San', N'giờ', 2, 120000, 240000),
+    (@DH2, 4, N'Thuê vợt cầu lông', 'DichVu', N'cây', 2, 30000, 60000);
+
+-- Đơn hàng 3: Đang chơi (DangChoi)
+DECLARE @DH3 UNIQUEIDENTIFIER = 'C0000000-0000-0000-0000-000000000003';
+INSERT INTO DonHang (MaDonHang, SoDonHang, MaThanhVien, MaCoSo, NgayDatChoi, TenKhachHang, SoDienThoaiKhach, TrangThai, TongTien, TienCoc, GiuChoDen, GhiChu, KhoaChongTrung, RequestHash, NgayTao)
+VALUES (@DH3, 'DH-20261122-003', @MemberId, 1, CAST(GETDATE() AS DATE), N'Lê Hoàng Phúc', '0903334455', 'DangChoi', 530000, 200000, NULL, N'Khách đang nhận sân và mượn thêm bóng', 'KEY-DH-003', HASHBYTES('SHA2_256', 'DH-003'), DATEADD(HOUR, -4, SYSUTCDATETIME()));
+
+INSERT INTO ChiTietDonHang (MaDonHang, MaSanPham, TenSanPham, LoaiSanPham, DonViTinh, SoLuong, DonGia, ThanhTien)
+VALUES 
+    (@DH3, 3, N'Sân Bóng Đá 5 Người A1', 'San', N'giờ', 2, 250000, 500000),
+    (@DH3, 6, N'Nước suối / Revive', 'DichVu', N'chai', 2, 15000, 30000);
+
+-- Đơn hàng 4: Hoàn thành (HoanThanh)
+DECLARE @DH4 UNIQUEIDENTIFIER = 'C0000000-0000-0000-0000-000000000004';
+INSERT INTO DonHang (MaDonHang, SoDonHang, MaThanhVien, MaCoSo, NgayDatChoi, TenKhachHang, SoDienThoaiKhach, TrangThai, TongTien, TienCoc, GiuChoDen, GhiChu, KhoaChongTrung, RequestHash, NgayTao)
+VALUES (@DH4, 'DH-20261121-001', @MemberId, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)), N'Phạm Thuỳ Linh', '0938889999', 'HoanThanh', 460000, 460000, NULL, N'Khách thanh toán toàn bộ tiền mặt sau khi chơi', 'KEY-DH-004', HASHBYTES('SHA2_256', 'DH-004'), DATEADD(DAY, -1, SYSUTCDATETIME()));
+
+INSERT INTO ChiTietDonHang (MaDonHang, MaSanPham, TenSanPham, LoaiSanPham, DonViTinh, SoLuong, DonGia, ThanhTien)
+VALUES 
+    (@DH4, 1, N'Sân Cầu Lông 01', 'San', N'giờ', 3, 80000, 240000),
+    (@DH4, 5, N'Ống cầu lông Hải Yến', 'DichVu', N'ống', 1, 220000, 220000);
+
+-- Đơn hàng 5: Đã hủy (DaHuy)
+DECLARE @DH5 UNIQUEIDENTIFIER = 'C0000000-0000-0000-0000-000000000005';
+INSERT INTO DonHang (MaDonHang, SoDonHang, MaThanhVien, MaCoSo, NgayDatChoi, TenKhachHang, SoDienThoaiKhach, TrangThai, TongTien, TienCoc, GiuChoDen, GhiChu, KhoaChongTrung, RequestHash, NgayTao)
+VALUES (@DH5, 'DH-20261120-001', @MemberId, 1, DATEADD(DAY, -2, CAST(GETDATE() AS DATE)), N'Vũ Đình Khang', '0971112233', 'DaHuy', 250000, 0, NULL, N'Khách bận đột xuất xin hủy trước 24h', 'KEY-DH-005', HASHBYTES('SHA2_256', 'DH-005'), DATEADD(DAY, -2, SYSUTCDATETIME()));
+
+INSERT INTO ChiTietDonHang (MaDonHang, MaSanPham, TenSanPham, LoaiSanPham, DonViTinh, SoLuong, DonGia, ThanhTien)
+VALUES (@DH5, 3, N'Sân Bóng Đá 5 Người A1', 'San', N'giờ', 1, 250000, 250000);
+
+-- Nhật ký trạng thái đơn hàng mẫu
+INSERT INTO LichSuTrangThaiDon (MaDonHang, TrangThaiCu, TrangThaiMoi, NguoiThayDoi, LyDo, NgayTao)
+VALUES 
+    (@DH1, NULL, 'ChoCoc', @MemberId, N'Khách tạo đơn đặt sân trực tuyến', SYSUTCDATETIME()),
+    (@DH2, 'ChoCoc', 'DaXacNhan', @AdminId, N'Admin đã nhận cọc 150.000 qua Momo', DATEADD(HOUR, -2, SYSUTCDATETIME())),
+    (@DH3, 'DaXacNhan', 'DangChoi', @AdminId, N'Khách đã đến sân nhận sân thi đấu', DATEADD(HOUR, -4, SYSUTCDATETIME())),
+    (@DH4, 'DangChoi', 'HoanThanh', @AdminId, N'Khách hoàn thành trận đấu và thanh toán hết', DATEADD(DAY, -1, SYSUTCDATETIME())),
+    (@DH5, 'ChoCoc', 'DaHuy', @AdminId, N'Hủy đơn theo yêu cầu của khách hàng', DATEADD(DAY, -2, SYSUTCDATETIME()));
+GO
+

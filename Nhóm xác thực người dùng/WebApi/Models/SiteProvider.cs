@@ -11,4 +11,7 @@ public class SiteProvider : BaseProvider
 
     ThanhVienRepository? thanhVien;
     public ThanhVienRepository ThanhVien => thanhVien ??= new ThanhVienRepository(Context);
+
+    DonHangRepository? donHang;
+    public DonHangRepository DonHang => donHang ??= new DonHangRepository(Context);
 }

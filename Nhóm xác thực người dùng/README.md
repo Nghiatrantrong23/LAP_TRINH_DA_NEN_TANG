@@ -18,8 +18,16 @@
 | 9 | **Xác thực người dùng qua email (OTP)** | Điểm cộng | 0.50đ | `verify_email_page.dart` / `AuthController.VerifyEmail` / Bảng `MaXacThucEmail` (hash SHA256) |
 | 10 | **Quên mật khẩu (OTP qua email)** | Điểm cộng | 0.50đ | `forgot_password_page.dart` / `AuthController.ForgotPassword` / Bảng `MaXacThucEmail` |
 | 11 | **Đăng nhập Gmail, Facebook, Zalo** | Điểm cộng | 1.50đ (3 * 0.5đ) | `login_page.dart (_onExternalLogin)` / `AuthController.ExternalLogin` |
+| 12 | **Hiển thị danh sách đơn hàng (Admin)** | Bắt buộc | 0.25đ | `order_management_page.dart` / `OrderController.GetOrders` / Bảng `DonHang`, `ChiTietDonHang` |
+| 13 | **Cập nhật trạng thái đơn hàng** | Bắt buộc | 0.50đ | `order_management_page.dart` / `OrderController.UpdateStatus` / Bảng `DonHang`, `LichSuTrangThaiDon` |
+| 14 | **Tìm kiếm đơn hàng** | Điểm cộng | 0.25đ | `order_management_page.dart` / `DonHangRepository.GetOrders` (mã đơn, tên khách, SĐT) |
+| 15 | **Lọc đơn hàng theo ngày** | Điểm cộng | 0.25đ | `order_management_page.dart` / `DonHangRepository.GetOrders` (hôm nay, 7 ngày, tùy chọn) |
+| 16 | **Dùng Web API backend (Đơn hàng)** | Bắt buộc | 0.25đ | `OrderController.cs` (`[Authorize(Roles = "Admin")]`, RESTful API) |
 
-> 🎯 **Tổng điểm đạt được**: **3.0 điểm bắt buộc** (2.25đ chức năng + 0.75đ API) + **2.5 điểm cộng** = **5.5 điểm tuyệt đối**.
+> 🎯 **Tổng điểm đạt được**:
+> * **Xác thực & phân quyền người dùng**: 5.5 điểm (3.0đ bắt buộc + 2.5đ cộng).
+> * **Quản lý đơn hàng (Admin)**: 1.50 điểm (0.75đ bắt buộc + 0.50đ cộng + 0.25đ API).
+> * **Tổng điểm toàn bộ dự án**: **7.0 điểm**.
 
 ---
 
@@ -47,6 +55,10 @@
    * `MaThanhVien` (FK -> ThanhVien).
    * `RefreshTokenHash` (BINARY(32): lưu hash SHA256 của Refresh Token).
    * `HetHanLuc`, `ThuHoiLuc`.
+5. **`DonHang` & `ChiTietDonHang` & `LichSuTrangThaiDon`**:
+   * `DonHang`: `MaDonHang` (PK), `SoDonHang` (Unique), `MaThanhVien` (FK), `NgayDatChoi`, `TenKhachHang`, `SoDienThoaiKhach`, `TrangThai` ('ChoCoc', 'DaXacNhan', 'DangChoi', 'HoanThanh', 'DaHuy'), `TongTien`, `TienCoc`, `GhiChu`, `NgayTao`, `NgayCapNhat`.
+   * `ChiTietDonHang`: `MaChiTietDon` (PK), `MaDonHang` (FK), `MaSanPham`, `TenSanPham`, `LoaiSanPham` ('San' | 'DichVu'), `DonViTinh`, `SoLuong`, `DonGia`, `ThanhTien`.
+   * `LichSuTrangThaiDon`: `MaLichSu` (PK), `MaDonHang` (FK), `TrangThaiCu`, `TrangThaiMoi`, `NguoiThayDoi` (FK), `LyDo`, `NgayTao`.
 
 ---
 

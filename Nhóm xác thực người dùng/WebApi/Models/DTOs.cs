@@ -76,3 +76,49 @@ public class ChangeRoleModel
     public Guid MemberId { get; set; }
     public short RoleId { get; set; }
 }
+
+// DTOs Quản lý đơn hàng (Admin)
+public class OrderDto
+{
+    public Guid MaDonHang { get; set; }
+    public string SoDonHang { get; set; } = null!;
+    public Guid MaThanhVien { get; set; }
+    public int MaCoSo { get; set; }
+    public string NgayDatChoi { get; set; } = null!;
+    public string TenKhachHang { get; set; } = null!;
+    public string SoDienThoaiKhach { get; set; } = null!;
+    public string TrangThai { get; set; } = null!; // ChoCoc, DaXacNhan, DangChoi, HoanThanh, DaHuy
+    public string TrangThaiText { get; set; } = null!;
+    public decimal TongTien { get; set; }
+    public decimal TienCoc { get; set; }
+    public string? GhiChu { get; set; }
+    public DateTime NgayTao { get; set; }
+    public DateTime? NgayCapNhat { get; set; }
+    public int SoLuongMatHang { get; set; }
+    public List<OrderItemDto> ChiTiet { get; set; } = new();
+}
+
+public class OrderItemDto
+{
+    public long MaChiTietDon { get; set; }
+    public int MaSanPham { get; set; }
+    public string TenSanPham { get; set; } = null!;
+    public string LoaiSanPham { get; set; } = null!;
+    public string DonViTinh { get; set; } = null!;
+    public int SoLuong { get; set; }
+    public decimal? DonGia { get; set; }
+    public decimal ThanhTien { get; set; }
+}
+
+public class UpdateOrderStatusModel
+{
+    public string TrangThai { get; set; } = null!;
+    public string? LyDo { get; set; }
+}
+
+public class OrderStatusDefinitionDto
+{
+    public string Code { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public string Color { get; set; } = null!;
+}
