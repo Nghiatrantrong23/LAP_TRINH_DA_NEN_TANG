@@ -5,10 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:trek_bikes_app/main.dart';
-import 'package:trek_bikes_app/api_client.dart';
-import 'package:trek_bikes_app/member.dart';
-import 'package:trek_bikes_app/session_helper.dart';
+import 'package:datsan/main.dart';
+import 'package:datsan/api_client.dart';
+import 'package:datsan/member.dart';
+import 'package:datsan/session_helper.dart';
 
 const memberJson = {
   'id': 'member-id',
