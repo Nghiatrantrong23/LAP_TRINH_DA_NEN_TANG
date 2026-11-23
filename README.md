@@ -18,8 +18,7 @@ D:\LTDNT\
 │   └── lib/                 # Toàn bộ mã nguồn UI, Model, Repo (xem trek_bikes_app/lib/README.md)
 │
 ├── database/                # Scripts cơ sở dữ liệu
-│   ├── SportsBooking.sql    # Schema database SportsBookingStage2
-│   └── TrekBikes.sql        # Schema Trek Bikes gốc
+│   └── SportsBooking.sql    # Schema database SportsBookingStage2
 │
 ├── docs/                    # Tài liệu và báo cáo tích hợp
 │   ├── INTEGRATION_REPORT.md # Báo cáo chi tiết đối chiếu 31 chức năng rubric
@@ -27,8 +26,7 @@ D:\LTDNT\
 │   └── API-STAGE3.md        # Tài liệu API danh mục & sân bãi
 │
 ├── _references/             # Mã nguồn tham khảo từ các nhóm và PR trước
-│   ├── Nhom_xac_thuc_nguoi_dung/ # Tham khảo Social Login, OTP
-│   └── Nhom_quan_ly_don_hang/    # Tham khảo nghiệp vụ đơn hàng Trek Bikes gốc
+│   └── Nhom_xac_thuc_nguoi_dung/ # Tham khảo Social Login, OTP
 │
 ├── tests/                   # Các kịch bản kiểm thử tự động
 ├── setup.ps1                # Script khởi tạo nhanh môi trường và database
@@ -158,7 +156,7 @@ trek_bikes_app/lib/
 
 `AuthController.Register` gọi `Provider.Auth.Register`; `AdminMemberController` gọi `Provider.Member`; các Repository nhận `SportsBookingContext` qua `BaseRepository`. Helper xử lý token, chuẩn hóa email và DTO; không thay Repository bằng tầng nghiệp vụ khác.
 
-Các file xe đạp không dùng trong bản Stage2 đã được loại khỏi bản làm việc. Mã nguồn được cập nhật trực tiếp tại `D:\LTDNT`; bản gốc trước cập nhật đã sao lưu trong `Documents\SportBooking-Update`. Lịch sử Git gốc vẫn giữ để đối chiếu. `TrekBikes.sql` là script mẫu tham khảo; `SportsBooking.sql` là schema mới.
+Toàn bộ các file xe đạp cũ đã được loại bỏ hoàn toàn khỏi repo. Mã nguồn được cập nhật trực tiếp tại `D:\LTDNT`. `SportsBooking.sql` là schema chuẩn của dự án.
 
 ## Database và migration
 
