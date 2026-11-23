@@ -81,7 +81,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     categories = options[0].cast<Category>();
     venues = options[1];
     if (widget.id == null) return;
-    current = await repository.getProduct(widget.id!);
+    current = await repository.getProduct(widget.id!, admin: true);
     final p = current!;
     categoryId = p.categoryId;
     venueId = p.venueId;

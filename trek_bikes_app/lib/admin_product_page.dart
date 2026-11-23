@@ -34,7 +34,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
   }
 
   void reload() {
-    data = repository.getProducts(search: search.text, page: page);
+    data = repository.getProducts(search: search.text, page: page, admin: true);
   }
 
   Future<void> edit([int? id]) async {

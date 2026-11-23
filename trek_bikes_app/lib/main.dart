@@ -12,6 +12,8 @@ import 'admin_member_page.dart';
 import 'admin_category_page.dart';
 import 'admin_product_page.dart';
 import 'order_management_page.dart';
+import 'cart_page.dart';
+import 'details_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +51,8 @@ class MyApp extends StatelessWidget {
       '/admin/category': (_) => AdminCategoryPage(session: session),
       '/admin/product': (_) => AdminProductPage(session: session),
       '/admin/order': (_) => OrderManagementPage(session: session),
+      '/cart': (_) => CartPage(session: session),
+      '/details': (_) => DetailsPage(session: session),
     },
   );
 }

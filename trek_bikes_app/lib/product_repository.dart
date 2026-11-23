@@ -7,15 +7,20 @@ class ProductRepository {
   Future<Map<String, dynamic>> getProducts({
     String search = '',
     int page = 1,
+    int? categoryId,
+    bool admin = false,
   }) async {
+    final base = admin ? '/admin/product' : '/product';
+    final catParam = categoryId != null ? '&categoryId=$categoryId' : '';
     return await api.call(
       'GET',
-      '/admin/product?search=${Uri.encodeQueryComponent(search)}&pageIndex=$page&pageSize=10',
+      '$base?search=${Uri.encodeQueryComponent(search)}&pageIndex=$page&pageSize=20$catParam',
     );
   }
 
-  Future<Product> getProduct(int id) async {
-    return Product.fromMap(await api.call('GET', '/admin/product/$id'));
+  Future<Product> getProduct(int id, {bool admin = false}) async {
+    final base = admin ? '/admin/product' : '/product';
+    return Product.fromMap(await api.call('GET', '$base/$id'));
   }
 
   Future<List<dynamic>> getVenues() async {
