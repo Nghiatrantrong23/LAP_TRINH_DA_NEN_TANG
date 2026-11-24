@@ -46,7 +46,24 @@ class _CartPageState extends State<CartPage> {
           return DataRow(cells: [
             DataCell(Text(p.name)),
             DataCell(Text('${p.basePrice.toStringAsFixed(0)} đ')),
-            DataCell(Text(p.quantity.toString())),
+            DataCell(
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove, size: 16),
+                    onPressed: p.quantity > 1
+                        ? () => _onUpdateQuantity(p.id, p.quantity - 1)
+                        : null,
+                  ),
+                  Text(p.quantity.toString()),
+                  IconButton(
+                    icon: const Icon(Icons.add, size: 16),
+                    onPressed: () => _onUpdateQuantity(p.id, p.quantity + 1),
+                  ),
+                ],
+              ),
+            ),
             DataCell(Text('${p.amount.toStringAsFixed(0)} đ')),
             DataCell(
               ElevatedButton.icon(
@@ -59,6 +76,13 @@ class _CartPageState extends State<CartPage> {
         }).toList(),
       ),
     );
+  }
+
+  void _onUpdateQuantity(int id, int newQty) async {
+    int ret = await _repository.updateQuantity(id, newQty);
+    if (ret > 0) {
+      _loadCarts();
+    }
   }
 
   void _onDelete(int id) async {

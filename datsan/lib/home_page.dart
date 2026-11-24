@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   int? _categoryId;
   int _cartCount = 0;
   String? _email;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -28,6 +29,12 @@ class _HomePageState extends State<HomePage> {
     _loadData();
     _loadCategories();
     _loadProducts();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _loadData() async {
@@ -59,7 +66,7 @@ class _HomePageState extends State<HomePage> {
   void _loadProducts() async {
     try {
       final res = await ProductRepository(widget.session.api).getProducts(
-        search: '',
+        search: _searchController.text.trim(),
         page: 1,
         categoryId: _categoryId,
       );
@@ -148,16 +155,58 @@ class _HomePageState extends State<HomePage> {
                 icon: const Icon(Icons.receipt_long),
               ),
             if (widget.session.member?.isAdmin == true)
-              ElevatedButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/admin/member'),
-                label: const Text('Admin'),
+              PopupMenuButton<String>(
                 icon: const Icon(Icons.admin_panel_settings),
+                tooltip: 'Quản trị Admin',
+                onSelected: (route) => Navigator.pushNamed(context, route),
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: '/admin/category',
+                    child: Text('Quản lý danh mục'),
+                  ),
+                  PopupMenuItem(
+                    value: '/admin/product',
+                    child: Text('Quản lý sân & dịch vụ'),
+                  ),
+                  PopupMenuItem(
+                    value: '/admin/member',
+                    child: Text('Quản lý thành viên'),
+                  ),
+                  PopupMenuItem(
+                    value: '/admin/order',
+                    child: Text('Quản lý đơn hàng'),
+                  ),
+                ],
               ),
           ],
         ],
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Tìm kiếm sân, đồ uống, dịch vụ...',
+                      prefixIcon: Icon(Icons.search, size: 20),
+                      isDense: true,
+                    ),
+                    onSubmitted: (_) => _loadProducts(),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                ElevatedButton.icon(
+                  onPressed: _loadProducts,
+                  label: const Text('Tìm'),
+                  icon: const Icon(Icons.search, size: 18),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: GridView.builder(
               itemCount: _products.length,

@@ -25,4 +25,12 @@ LOCAL-ADMIN.txt
 **/key.properties
 .vscode/
 
-WebApi/wwwroot/uploads/
+WebApi/wwwroot/uploads/*
+!WebApi/wwwroot/uploads/products/
+!WebApi/wwwroot/uploads/products/**
+
+
+# source tham khao khong dua vao source control
+_references/sport_booking_source/
+
+

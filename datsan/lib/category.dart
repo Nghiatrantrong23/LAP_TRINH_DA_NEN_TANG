@@ -14,13 +14,13 @@ class Category {
   });
   factory Category.fromMap(Map<String, dynamic> map) {
     return Category(
-      id: map['id'],
-      name: map['name'],
-      rowVersion: map['rowVersion'],
+      id: (map['id'] as num?)?.toInt() ?? 0,
+      name: map['name'] ?? '',
+      rowVersion: map['rowVersion'] ?? '',
       description: map['description'],
       imagePath: map['imagePath'],
-      displayOrder: map['displayOrder'],
-      isActive: map['isActive'],
+      displayOrder: (map['displayOrder'] as num?)?.toInt() ?? 0,
+      isActive: map['isActive'] ?? true,
     );
   }
 }
