@@ -217,14 +217,17 @@ class _HomePageState extends State<HomePage> {
                 Product item = _products[index];
                 return Column(
                   children: [
-                    if (item.imagePath != null)
+                    if (item.imagePath != null && item.imagePath!.isNotEmpty)
                       Image.network(
-                        '${widget.session.api.baseUrl}/uploads/${item.imagePath}',
-                        width: 100,
-                        height: 70,
+                        item.imagePath!.startsWith('/')
+                            ? '${widget.session.api.baseUrl}${item.imagePath}'
+                            : '${widget.session.api.baseUrl}/uploads/${item.imagePath}',
+                        width: 120,
+                        height: 80,
                         fit: BoxFit.cover,
                         errorBuilder: (ctx, err, stack) =>
-                            const Icon(Icons.sports_tennis, size: 50),)
+                            const Icon(Icons.sports_tennis, size: 50),
+                      )
                     else
                       const Icon(Icons.sports_tennis, size: 50),
                     Text(item.name, overflow: TextOverflow.ellipsis),

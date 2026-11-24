@@ -96,10 +96,14 @@ class _DetailsPageState extends State<DetailsPage> {
       body: Column(
         children: [
           if (_product != null) ...[
-            if (_product!.imagePath != null)
+            if (_product!.imagePath != null && _product!.imagePath!.isNotEmpty)
               Image.network(
-                '${widget.session.api.baseUrl}/uploads/${_product!.imagePath}',
+                _product!.imagePath!.startsWith('/')
+                    ? '${widget.session.api.baseUrl}${_product!.imagePath}'
+                    : '${widget.session.api.baseUrl}/uploads/${_product!.imagePath}',
                 width: 256,
+                height: 180,
+                fit: BoxFit.cover,
                 errorBuilder: (ctx, err, stack) => const Icon(Icons.sports_tennis, size: 80),
               ),
             Text(_product!.name, style: const TextStyle(fontWeight: FontWeight.bold)),
