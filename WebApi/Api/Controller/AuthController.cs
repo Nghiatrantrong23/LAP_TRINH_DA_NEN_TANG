@@ -6,12 +6,12 @@ namespace WebApi.Api.Controller;
 [ApiController, Route("api/auth")]
 public class AuthController : BaseController
 {
-    [HttpPost("register"), EnableRateLimiting("auth")]
+    [HttpPost("register"), HttpPost("/api/register"), EnableRateLimiting("auth")]
     public async Task<IActionResult> Register(RegisterModel model)
     {
         return StatusCode(201, await Provider.Auth.Register(model));
     }
-    [HttpPost("login"), EnableRateLimiting("auth")]
+    [HttpPost("login"), HttpPost("/api/login"), EnableRateLimiting("auth")]
     public Task<LoginResponse> Login(LoginModel model)
     {
         return Provider.Auth.Login(model);

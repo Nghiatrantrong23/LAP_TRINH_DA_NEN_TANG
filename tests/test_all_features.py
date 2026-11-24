@@ -43,8 +43,8 @@ def run_tests():
 
     # 1. Dang nhap Admin
     status, res = make_request("POST", f"{BASE_URL}/auth/login", {
-        "email": "admin@example.com",
-        "password": "61zdVcZIMEUkHrdcOFVqrys6"
+        "email": "nghiaadmin@gmail.com",
+        "password": "147852369"
     })
     check("Dang nhap Admin", status == 200 and "token" in res)
     admin_token = res.get("token")
