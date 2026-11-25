@@ -23,6 +23,7 @@ class _OrderManagementPageState extends State<OrderManagementPage> {
   List<Map<String, String>> _statuses = [];
   String? _orderId;
   String? _status;
+  String? _statusFilter;
   final TextEditingController _search = TextEditingController();
   DateTime? _filterDate;
 
@@ -42,6 +43,7 @@ class _OrderManagementPageState extends State<OrderManagementPage> {
     }
     var data = await _repository.getOrders(
       search: _search.text.trim().isEmpty ? null : _search.text.trim(),
+      status: _statusFilter,
       fromDate: fromDate,
       toDate: toDate,
     );
@@ -230,6 +232,43 @@ class _OrderManagementPageState extends State<OrderManagementPage> {
               ],
             ),
           ),
+          if (_statuses.isNotEmpty)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 4.0),
+                    child: ChoiceChip(
+                      label: const Text('Tất cả'),
+                      selected: _statusFilter == null,
+                      onSelected: (val) {
+                        setState(() {
+                          _statusFilter = null;
+                        });
+                        _loadOrders();
+                      },
+                    ),
+                  ),
+                  ..._statuses.map((s) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 4.0),
+                      child: ChoiceChip(
+                        label: Text(s['name'] ?? ''),
+                        selected: _statusFilter == s['code'],
+                        onSelected: (val) {
+                          setState(() {
+                            _statusFilter = val ? s['code'] : null;
+                          });
+                          _loadOrders();
+                        },
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
           if (_orders.isNotEmpty) ...[
             _loadListView(),
           ] else ...[
