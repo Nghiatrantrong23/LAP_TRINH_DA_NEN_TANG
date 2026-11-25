@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'auth_dialog.dart';
+
 import 'session_helper.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,18 +25,57 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> login() async {
     if (!form.currentState!.validate()) return;
+    await signIn(() => widget.session.login(email.text, password.text));
+  }
+
+  Future<void> signIn(Future<void> Function() authenticate) async {
     setState(() {
       busy = true;
       error = null;
     });
     try {
-      await widget.session.login(email.text, password.text);
+      await authenticate();
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) setState(() => error = e.toString());
     } finally {
       if (mounted) setState(() => busy = false);
     }
+  }
+
+  Future<void> recoverPassword() async {
+    final repository = widget.session.repository;
+    final address = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AuthDialog(
+        title: 'Quên mật khẩu',
+        action: 'Gửi mã xác nhận',
+        label: 'Email',
+        email: true,
+        initialValue: email.text,
+        submit: (value, _) => repository.forgotPassword(value),
+      ),
+    );
+    if (!mounted || address == null) return;
+    final completed = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AuthDialog(
+        title: 'Nhập mã nếu email đã đăng ký',
+        action: 'Đổi mật khẩu',
+        label: 'Mã xác nhận',
+        newPassword: true,
+        submit: (otp, secret) => repository.resetPassword(address, otp, secret),
+      ),
+    );
+    if (!mounted || completed == null) return;
+    email.text = address;
+    password.clear();
+    setState(() => error = null);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Đã đổi mật khẩu. Bạn có thể đăng nhập.')),
+    );
   }
 
   @override
@@ -86,6 +127,25 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: busy ? null : login,
                   child: Text(busy ? 'Đang đăng nhập…' : 'Đăng nhập'),
                 ),
+                TextButton(
+                  onPressed: busy ? null : recoverPassword,
+                  child: const Text('Quên mật khẩu?'),
+                ),
+                const Text('Đăng nhập demo', textAlign: TextAlign.center),
+                for (final (provider, icon) in const [
+                  ('Google', Icons.g_mobiledata),
+                  ('Facebook', Icons.facebook),
+                  ('Zalo', Icons.chat_bubble_outline),
+                ])
+                  OutlinedButton.icon(
+                    onPressed: busy
+                        ? null
+                        : () => signIn(
+                            () => widget.session.externalLogin(provider),
+                          ),
+                    icon: Icon(icon),
+                    label: Text('Đăng nhập với $provider'),
+                  ),
                 TextButton(
                   onPressed: busy
                       ? null

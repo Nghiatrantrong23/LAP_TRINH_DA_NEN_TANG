@@ -46,6 +46,9 @@ class SessionHelper extends ChangeNotifier {
 
   Future<void> login(String email, String password) async =>
       _save(await repository.login(Login(email: email, password: password)));
+  Future<void> externalLogin(String provider) async =>
+      _save(await repository.externalLogin(provider));
+
   Future<bool> refresh() async {
     if (_refreshing != null) return _refreshing!;
     final operation = _rotate();

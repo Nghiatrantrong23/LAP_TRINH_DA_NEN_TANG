@@ -9,6 +9,49 @@ class MemberRepository {
   Future<LoginResponse> login(Login model) async => LoginResponse.fromMap(
     await api.call('POST', '/auth/login', body: model.toMap()),
   );
+  Future<void> sendVerificationEmail() async {
+    await api.call('POST', '/auth/send-verification-email');
+  }
+
+  Future<void> verifyEmail(String otp) async {
+    await api.call('POST', '/auth/verify-email', body: {'otp': otp});
+  }
+
+  Future<void> forgotPassword(String email) async {
+    await api.call(
+      'POST',
+      '/auth/forgot-password',
+      body: {'email': email},
+      retryAuth: false,
+    );
+  }
+
+  Future<void> resetPassword(String email, String otp, String password) async {
+    await api.call(
+      'POST',
+      '/auth/reset-password',
+      body: {'email': email, 'otp': otp, 'newPassword': password},
+      retryAuth: false,
+    );
+  }
+
+  Future<LoginResponse> externalLogin(String provider) async {
+    final slug = provider.toLowerCase();
+    return LoginResponse.fromMap(
+      await api.call(
+        'POST',
+        '/auth/external-login',
+        body: {
+          'provider': provider,
+          'email': '$slug@sportbooking.invalid',
+          'name': '$provider Demo',
+          'providerKey': 'demo-$slug',
+        },
+        retryAuth: false,
+      ),
+    );
+  }
+
   Future<Member> register({
     required String email,
     required String password,

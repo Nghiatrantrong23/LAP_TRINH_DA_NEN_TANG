@@ -15,12 +15,69 @@
 			"key": "token",
 			"value": "",
 			"type": "string"
-		}
+		},
+		{"key": "authEmail", "value": ""},
+		{"key": "verifyOtp", "value": ""},
+		{"key": "resetOtp", "value": ""},
+		{"key": "newPassword", "value": ""},
+		{"key": "demoProvider", "value": "Google"},
+		{"key": "demoSlug", "value": "google"}
 	],
 	"item": [
 		{
 			"name": "1. Xác thực người dùng (Auth)",
 			"item": [
+				{
+					"name": "Xác thực email, đặt lại mật khẩu và đăng nhập demo",
+					"description": "Dùng token tài khoản Member chưa xác thực cho hai request đầu. Mã OTP có hiệu lực 15 phút. Trong Development, OTP xuất hiện ở console WebApi, kể cả khi có SMTP. Gán email và mã nhận được vào các biến cục bộ authEmail, verifyOtp, resetOtp và newPassword. Đăng nhập demo chỉ dùng trong Development; demoProvider và demoSlug có thể đổi thành Facebook/facebook hoặc Zalo/zalo.",
+					"item": [
+						{
+							"name": "Gửi mã xác thực email (204)",
+							"request": {
+								"method": "POST",
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+								"url": "{{baseUrl}}/auth/send-verification-email"
+							}
+						},
+						{
+							"name": "Xác thực email bằng OTP (204)",
+							"request": {
+								"method": "POST",
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"otp\":\"{{verifyOtp}}\"}"},
+								"url": "{{baseUrl}}/auth/verify-email"
+							}
+						},
+						{
+							"name": "Yêu cầu mã đặt lại mật khẩu (204)",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"email\":\"{{authEmail}}\"}"},
+								"url": "{{baseUrl}}/auth/forgot-password"
+							}
+						},
+						{
+							"name": "Đặt lại mật khẩu bằng OTP (204)",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"email\":\"{{authEmail}}\",\"otp\":\"{{resetOtp}}\",\"newPassword\":\"{{newPassword}}\"}"},
+								"url": "{{baseUrl}}/auth/reset-password"
+							}
+						},
+						{
+							"name": "Đăng nhập bằng tài khoản demo (200)",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"provider\":\"{{demoProvider}}\",\"email\":\"{{demoSlug}}@sportbooking.invalid\",\"name\":\"{{demoProvider}} Demo\",\"providerKey\":\"demo-{{demoSlug}}\"}"},
+								"url": "{{baseUrl}}/auth/external-login"
+							}
+						}
+					]
+				},
 				{
 					"name": "Đăng nhập Admin (Tự động lưu Token)",
 					"event": [

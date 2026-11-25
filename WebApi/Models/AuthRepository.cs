@@ -2,7 +2,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Services;
 namespace WebApi.Models;
-public class AuthRepository : BaseRepository
+public partial class AuthRepository : BaseRepository
 {
     private readonly IConfiguration configuration;
 
@@ -21,6 +21,10 @@ public class AuthRepository : BaseRepository
         }
 
         var normalized = Helper.NormalizeEmail(model.Email);
+        if (normalized.EndsWith("@SPORTBOOKING.INVALID", StringComparison.Ordinal))
+        {
+            throw new BusinessException(400, "RESERVED_EMAIL", "Email này dành riêng cho tài khoản demo.");
+        }
         if (await context.Members.AnyAsync(x => x.NormalizedEmail == normalized))
         {
             throw new BusinessException(409, "EMAIL_EXISTS", "Email đã được đăng ký.");
@@ -52,6 +56,11 @@ public class AuthRepository : BaseRepository
             throw new BusinessException(403, "ACCOUNT_LOCKED", "Tài khoản đã bị khóa.");
         }
 
+        return await CreateSession(member);
+    }
+
+    private async Task<LoginResponse> CreateSession(Member member)
+    {
         var refresh = Helper.NewRefreshToken();
         var session = new AuthSession { MemberId = member.Id, RefreshTokenHash = Helper.HashToken(refresh), ExpiresAt = DateTime.UtcNow.AddDays(configuration.GetValue<int>("Jwt:RefreshDays", 30)) };
         context.AuthSessions.Add(session);

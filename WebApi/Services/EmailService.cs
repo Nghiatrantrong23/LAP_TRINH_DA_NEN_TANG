@@ -5,6 +5,7 @@ namespace WebApi.Services;
 
 public interface IEmailService
 {
+    Task<bool> SendOtpAsync(string toEmail, string subject, string otp);
     Task<bool> SendEmailAsync(string toEmail, string subject, string body);
 }
 
@@ -13,10 +14,24 @@ public class EmailService : IEmailService
     private readonly IConfiguration _config;
     private readonly ILogger<EmailService> _logger;
 
-    public EmailService(IConfiguration config, ILogger<EmailService> logger)
+    private readonly IWebHostEnvironment _environment;
+
+    public EmailService(IConfiguration config, ILogger<EmailService> logger, IWebHostEnvironment environment)
     {
         _config = config;
         _logger = logger;
+        _environment = environment;
+    }
+
+    public async Task<bool> SendOtpAsync(string toEmail, string subject, string otp)
+    {
+        var logOtp = _environment.IsDevelopment() && _config.GetValue<bool>("EmailSettings:LogOtp");
+        if (logOtp)
+        {
+            Console.WriteLine($"[OTP CODE: {otp}]");
+            if (string.IsNullOrWhiteSpace(_config["EmailSettings:Password"])) return true;
+        }
+        return await SendEmailAsync(toEmail, subject, $"Mã xác nhận của bạn là <strong>{otp}</strong>. Mã có hiệu lực trong 15 phút.") || logOtp;
     }
 
     public async Task<bool> SendEmailAsync(string toEmail, string subject, string body)
@@ -52,13 +67,8 @@ public class EmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning($"[EmailService Demo Mode] Cannot send live SMTP. Message content: {body}. Error: {ex.Message}");
-            Console.WriteLine($"========================================================");
-            Console.WriteLine($"[EMAIL SENT TO: {toEmail}]");
-            Console.WriteLine($"Subject: {subject}");
-            Console.WriteLine($"Body: {body}");
-            Console.WriteLine($"========================================================");
-            return true;
+            _logger.LogWarning("Không gửi được email qua SMTP ({ErrorType}).", ex.GetType().Name);
+            return false;
         }
     }
 }

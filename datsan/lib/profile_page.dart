@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'auth_dialog.dart';
 import 'member.dart';
 import 'session_helper.dart';
 import 'helper.dart';
@@ -61,6 +62,35 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> confirmEmail() async {
+    setState(() => busy = true);
+    final repository = widget.session.repository;
+    try {
+      await repository.sendVerificationEmail();
+      if (!mounted) return;
+      final result = await showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AuthDialog(
+          title: 'Xác thực email',
+          action: 'Xác nhận',
+          label: 'Mã xác nhận',
+          submit: (otp, _) => repository.verifyEmail(otp),
+        ),
+      );
+      if (!mounted || result == null) return;
+      final member = await repository.getMember();
+      if (!mounted) return;
+      widget.session.setMember(member);
+      setState(() => data = Future.value(member));
+      showMessage(context, 'Đã xác thực email.');
+    } catch (e) {
+      if (mounted) showMessage(context, e);
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Thông tin tài khoản')),
@@ -74,6 +104,18 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             Text(m.email, style: Theme.of(context).textTheme.titleLarge),
             Text('Quyền: ${m.role}'),
+            if (m.emailConfirmed)
+              const Text(
+                'Đã xác thực email',
+                style: TextStyle(color: Colors.green),
+              )
+            else ...[
+              const Text('Chưa xác thực email'),
+              TextButton(
+                onPressed: busy ? null : confirmEmail,
+                child: const Text('Gửi mã xác thực'),
+              ),
+            ],
             TextField(
               controller: surname,
               maxLength: 50,
