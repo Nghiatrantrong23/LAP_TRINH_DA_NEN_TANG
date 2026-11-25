@@ -16,6 +16,7 @@ if (string.IsNullOrWhiteSpace(secret) || Encoding.UTF8.GetByteCount(secret) < 32
 
 builder.Services.AddDbContext<SportsBookingContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("SportsBooking")));
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<SiteProvider>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddControllers();

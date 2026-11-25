@@ -115,6 +115,35 @@ public partial class AuthRepository
         return result;
     }
 
+    public async Task<LoginResponse> UpsertExternalMemberAsync(string email, string givenName, string surname)
+    {
+        var normalized = Helper.NormalizeEmail(email);
+        await using var tx = await context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        var member = await LockMemberByEmail(normalized);
+        if (member is null)
+        {
+            member = new Member
+            {
+                Id = Guid.NewGuid(),
+                Email = email.Trim(),
+                NormalizedEmail = normalized,
+                GivenName = string.IsNullOrWhiteSpace(givenName) ? "Khách" : givenName.Trim(),
+                Surname = (surname ?? "").Trim(),
+                EmailConfirmed = true,
+                RoleId = 1,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Helper.NewRefreshToken()[..32])
+            };
+            context.Members.Add(member);
+            context.Carts.Add(new Cart { MemberId = member.Id });
+        }
+        if (member.IsLocked)
+            throw new BusinessException(403, "ACCOUNT_LOCKED", "Tài khoản đã bị khóa.");
+        member.Role = await context.Roles.SingleAsync(x => x.Id == member.RoleId);
+        var result = await CreateSession(member);
+        await tx.CommitAsync();
+        return result;
+    }
+
     private Task<Member?> LockMember(Guid id) => context.Members
         .FromSqlInterpolated($"SELECT * FROM Members WITH (UPDLOCK,HOLDLOCK) WHERE Id={id}").SingleOrDefaultAsync();
 

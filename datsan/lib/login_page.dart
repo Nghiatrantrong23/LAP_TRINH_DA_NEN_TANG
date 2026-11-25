@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: busy ? null : recoverPassword,
                   child: const Text('Quên mật khẩu?'),
                 ),
-                const Text('Đăng nhập demo', textAlign: TextAlign.center),
+                const Text('Hoặc đăng nhập bằng', textAlign: TextAlign.center),
                 for (final (provider, icon) in const [
                   ('Google', Icons.g_mobiledata),
                   ('Facebook', Icons.facebook),

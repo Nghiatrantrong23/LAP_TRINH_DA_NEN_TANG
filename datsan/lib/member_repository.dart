@@ -1,3 +1,5 @@
+import 'package:url_launcher/url_launcher.dart';
+
 import 'api_client.dart';
 import 'login.dart';
 import 'login_response.dart';
@@ -37,19 +39,37 @@ class MemberRepository {
 
   Future<LoginResponse> externalLogin(String provider) async {
     final slug = provider.toLowerCase();
-    return LoginResponse.fromMap(
-      await api.call(
-        'POST',
-        '/auth/external-login',
-        body: {
-          'provider': provider,
-          'email': '$slug@sportbooking.invalid',
-          'name': '$provider Demo',
-          'providerKey': 'demo-$slug',
-        },
+    final state =
+        '${DateTime.now().microsecondsSinceEpoch}_${Object().hashCode}';
+    final base = api.baseUrl.replaceAll(RegExp(r'/$'), '');
+    final uri = Uri.parse('$base/api/auth/oauth/$slug/start?state=$state');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw const ApiException('Không thể mở trình duyệt để đăng nhập.');
+    }
+
+    for (var i = 0; i < 120; i++) {
+      await Future.delayed(const Duration(seconds: 1));
+      final res = await api.call(
+        'GET',
+        '/auth/oauth/poll?state=$state',
         retryAuth: false,
-      ),
-    );
+      );
+      if (res is Map<String, dynamic>) {
+        final status = res['status'];
+        if (status == 'success' &&
+            res['loginResponse'] is Map<String, dynamic>) {
+          return LoginResponse.fromMap(
+            res['loginResponse'] as Map<String, dynamic>,
+          );
+        }
+        if (status == 'error') {
+          throw ApiException(
+            res['message']?.toString() ?? 'Đăng nhập thất bại.',
+          );
+        }
+      }
+    }
+    throw const ApiException('Hết thời gian chờ đăng nhập.');
   }
 
   Future<Member> register({
