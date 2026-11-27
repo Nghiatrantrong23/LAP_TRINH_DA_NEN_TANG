@@ -1,26 +1,28 @@
+using WebApi.Services;
+
 namespace WebApi.Models;
+
 public class SiteProvider : BaseProvider
 {
-    public SiteProvider(IHttpContextAccessor accessor) : base(accessor){}
-    CategoryRepository? category;
-    public CategoryRepository Category => category ??= new CategoryRepository(Context);
-    SubCategoryRepository? subCategory;
-    public SubCategoryRepository SubCategory => subCategory ??= new SubCategoryRepository(Context);
-    MemberRepository? member;
+    private readonly IConfiguration configuration;
+    private MemberRepository? member;
+    private AuthRepository? auth;
+    private CategoryRepository? category;
+    private ProductRepository? product;
+    private OrderRepository? order;
+    private CartRepository? cart;
+    private readonly FileStorage images;
+
+    public SiteProvider(IHttpContextAccessor accessor, IConfiguration configuration, FileStorage images) : base(accessor)
+    {
+        this.configuration = configuration;
+        this.images = images;
+    }
+
     public MemberRepository Member => member ??= new MemberRepository(Context);
-    BikeRepository? bike;
-
-    public BikeRepository Bike => bike ??= new BikeRepository(Context);
-
-    CartRepository? cart;
-
+    public AuthRepository Auth => auth ??= new AuthRepository(Context, configuration);
+    public CategoryRepository Category => category ??= new CategoryRepository(Context, images);
+    public ProductRepository Product => product ??= new ProductRepository(Context, images);
+    public OrderRepository Order => order ??= new OrderRepository(Context);
     public CartRepository Cart => cart ??= new CartRepository(Context);
-
-    InvoiceRepository? invoice;
-
-    public InvoiceRepository Invoice => invoice ??= new InvoiceRepository(Context);
-    
-    StatusRepository? status;
-    public StatusRepository Status => status ??= new StatusRepository(Context);
-
 }

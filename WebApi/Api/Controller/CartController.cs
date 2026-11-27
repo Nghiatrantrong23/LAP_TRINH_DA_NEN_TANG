@@ -1,47 +1,55 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Api.Controller;
 using WebApi.Models;
+namespace WebApi.Api.Controller;
 
-namespace WebApi.Api.Controllers;
-
-[Authorize, ApiController, Route("api/[controller]")]
+[Authorize, ApiController, Route("api/cart")]
 public class CartController : BaseController
 {
-    [HttpDelete("{id}")]
-    public int Delete(int id)
+    [HttpGet]
+    public Task<List<CartDto>> GetCart()
     {
-        return Provider.Cart.Delete(id);
+        return Provider.Cart.GetCartAsync(MemberId);
     }
 
-    [HttpGet]
-    public IEnumerable<object>? GetCarts()
+    [HttpGet("count")]
+    public Task<int> GetCount()
     {
-        string? memberId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!string.IsNullOrEmpty(memberId))
-        {
-            return Provider.Cart.GetCarts(memberId).Select(p => new {
-                p.Id,
-                p.BikeId,
-                p.Quantity,
-                p.MemberId,
-                p.Bike!.Price,
-                p.Bike!.ImageUrl,
-                p.Bike!.Name,
-            });
-        }
-        return null;
+        return Provider.Cart.CountAsync(MemberId);
     }
-    
+
     [HttpPost]
-    public int Add(Cart obj)
+    public async Task<IActionResult> AddToCart([FromBody] CartAddModel model)
     {
-        if (ModelState.IsValid)
-        {
-            obj.MemberId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return Provider.Cart.Add(obj);
-        }
-        return -2;
+        int ret = await Provider.Cart.AddToCartAsync(MemberId, model.ProductId, model.Quantity);
+        if (ret == -4) return NotFound(new { message = "Sản phẩm không tồn tại hoặc ngừng hoạt động." });
+        return Ok(ret);
     }
+
+    [HttpPut("{id:long}")]
+    public async Task<IActionResult> UpdateQuantity(long id, [FromBody] CartUpdateModel model)
+    {
+        int ret = await Provider.Cart.UpdateQuantityAsync(MemberId, id, model.Quantity);
+        if (ret == -1) return NotFound(new { message = "Không tìm thấy mục trong giỏ." });
+        return Ok(ret);
+    }
+
+    [HttpDelete("{id:long}")]
+    public async Task<IActionResult> Delete(long id)
+    {
+        int ret = await Provider.Cart.DeleteItemAsync(MemberId, id);
+        if (ret == -1) return NotFound(new { message = "Không tìm thấy mục trong giỏ." });
+        return Ok(ret);
+    }
+}
+
+public class CartAddModel
+{
+    public int ProductId { get; set; }
+    public int Quantity { get; set; } = 1;
+}
+
+public class CartUpdateModel
+{
+    public int Quantity { get; set; }
 }

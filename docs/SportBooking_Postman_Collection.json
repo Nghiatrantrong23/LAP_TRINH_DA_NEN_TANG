@@ -1,0 +1,551 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+		"name": "SportBooking API Collection",
+		"description": "Bộ API kiểm thử hoàn chỉnh cho đồ án Đặt Sân Thể Thao (SportBooking)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5290/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{"key": "authEmail", "value": ""},
+		{"key": "verifyOtp", "value": ""},
+		{"key": "resetOtp", "value": ""},
+		{"key": "newPassword", "value": ""},
+		{"key": "demoProvider", "value": "Google"},
+		{"key": "demoSlug", "value": "google"}
+	],
+	"item": [
+		{
+			"name": "1. Xác thực người dùng (Auth)",
+			"item": [
+				{
+					"name": "Xác thực email, đặt lại mật khẩu và đăng nhập demo",
+					"description": "Dùng token tài khoản Member chưa xác thực cho hai request đầu. Mã OTP có hiệu lực 15 phút. Trong Development, OTP xuất hiện ở console WebApi, kể cả khi có SMTP. Gán email và mã nhận được vào các biến cục bộ authEmail, verifyOtp, resetOtp và newPassword. Đăng nhập demo chỉ dùng trong Development; demoProvider và demoSlug có thể đổi thành Facebook/facebook hoặc Zalo/zalo.",
+					"item": [
+						{
+							"name": "Gửi mã xác thực email (204)",
+							"request": {
+								"method": "POST",
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+								"url": "{{baseUrl}}/auth/send-verification-email"
+							}
+						},
+						{
+							"name": "Xác thực email bằng OTP (204)",
+							"request": {
+								"method": "POST",
+								"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"otp\":\"{{verifyOtp}}\"}"},
+								"url": "{{baseUrl}}/auth/verify-email"
+							}
+						},
+						{
+							"name": "Yêu cầu mã đặt lại mật khẩu (204)",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"email\":\"{{authEmail}}\"}"},
+								"url": "{{baseUrl}}/auth/forgot-password"
+							}
+						},
+						{
+							"name": "Đặt lại mật khẩu bằng OTP (204)",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"email\":\"{{authEmail}}\",\"otp\":\"{{resetOtp}}\",\"newPassword\":\"{{newPassword}}\"}"},
+								"url": "{{baseUrl}}/auth/reset-password"
+							}
+						},
+						{
+							"name": "Đăng nhập bằng tài khoản demo (200)",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {"mode": "raw", "raw": "{\"provider\":\"{{demoProvider}}\",\"email\":\"{{demoSlug}}@sportbooking.invalid\",\"name\":\"{{demoProvider}} Demo\",\"providerKey\":\"demo-{{demoSlug}}\"}"},
+								"url": "{{baseUrl}}/auth/external-login"
+							}
+						}
+					]
+				},
+				{
+					"name": "Đăng nhập Admin (Tự động lưu Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"    console.log('Token đã được lưu tự động:', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nghiaadmin@gmail.com\",\n  \"password\": \"147852369\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Đăng ký thành viên mới",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"khachhang@example.com\",\n  \"givenName\": \"Văn An\",\n  \"surname\": \"Nguyễn\",\n  \"password\": \"MatKhau@123\",\n  \"phone\": \"0987654321\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Đăng nhập User thường (Tự động lưu Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"khachhang@example.com\",\n  \"password\": \"MatKhau@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Xem thông tin cá nhân (Profile)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/member/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["member", "me"]
+						}
+					}
+				},
+				{
+					"name": "Đổi mật khẩu",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"MatKhau@123\",\n  \"newPassword\": \"MatKhauMoi@456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/password",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "password"]
+						}
+					}
+				},
+				{
+					"name": "Đăng xuất (Logout)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Quản lý Danh mục (Category)",
+			"item": [
+				{
+					"name": "Lấy danh sách danh mục (Public)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": ["{{baseUrl}}"],
+							"path": ["category"]
+						}
+					}
+				},
+				{
+					"name": "Admin lấy danh sách danh mục",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/category",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "category"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Sản phẩm & Sân thể thao (Product)",
+			"item": [
+				{
+					"name": "Lấy danh sách sân có phân trang & tìm kiếm",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/product?pageIndex=1&pageSize=10&search=&categoryId=",
+							"host": ["{{baseUrl}}"],
+							"path": ["product"],
+							"query": [
+								{ "key": "pageIndex", "value": "1" },
+								{ "key": "pageSize", "value": "10" },
+								{ "key": "search", "value": "" },
+								{ "key": "categoryId", "value": "" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Xem chi tiết sân (ID = 1)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/product/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Quản lý Giỏ hàng (Cart)",
+			"item": [
+				{
+					"name": "Xem giỏ hàng hiện tại",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						}
+					}
+				},
+				{
+					"name": "Đếm số lượng mục trong giỏ (Badge)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/cart/count",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "count"]
+						}
+					}
+				},
+				{
+					"name": "Thêm sân hoặc dịch vụ vào giỏ",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 1,\n  \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						}
+					}
+				},
+				{
+					"name": "Cập nhật số lượng trong giỏ (ID = 1)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "1"]
+						}
+					}
+				},
+				{
+					"name": "Xóa mục khỏi giỏ (ID = 1)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/cart/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Quản lý Đơn hàng (Order Admin)",
+			"item": [
+				{
+					"name": "Admin xem danh sách tất cả đơn hàng",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/order",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "order"]
+						}
+					}
+				},
+				{
+					"name": "Admin tìm kiếm đơn theo từ khóa",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/order?search=DH",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "order"],
+							"query": [
+								{ "key": "search", "value": "DH" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Admin lọc đơn theo ngày",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/order?fromDate=2026-01-01&toDate=2026-12-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "order"],
+							"query": [
+								{ "key": "fromDate", "value": "2026-01-01" },
+								{ "key": "toDate", "value": "2026-12-31" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Lấy danh sách định nghĩa trạng thái",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/order/statuses",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "order", "statuses"]
+						}
+					}
+				},
+				{
+					"name": "Admin cập nhật trạng thái đơn hàng",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"trangThai\": \"DaXacNhan\",\n  \"lyDo\": \"Admin xác nhận qua Postman\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/order/576ddee5-bdf1-46ee-8e4e-bc15dfd397f5/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "order", "576ddee5-bdf1-46ee-8e4e-bc15dfd397f5", "status"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Quản lý Member & Role (Admin)",
+			"item": [
+				{
+					"name": "Lấy danh sách Role",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/role",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "role"]
+						}
+					}
+				},
+				{
+					"name": "Admin lấy danh sách thành viên",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/member",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "member"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

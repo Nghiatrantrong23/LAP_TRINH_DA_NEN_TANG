@@ -1,51 +1,79 @@
-using Microsoft.AspNetCore.Mvc;
-namespace WebApi.Api.Controllers;
-
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Razor.TagHelpers;
-using WebApi.Api.Controller;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using WebApi.Models;
-
-
-[ApiController, Route("api/[controller]")]
+using WebApi.Services;
+namespace WebApi.Api.Controller;
+[ApiController, Route("api/auth")]
 public class AuthController : BaseController
 {
+    [HttpPost("register"), HttpPost("/api/register"), EnableRateLimiting("auth")]
+    public async Task<IActionResult> Register(RegisterModel model)
+    {
+        return StatusCode(201, await Provider.Auth.Register(model));
+    }
+    [HttpPost("login"), HttpPost("/api/login"), EnableRateLimiting("auth")]
+    public Task<LoginResponse> Login(LoginModel model)
+    {
+        return Provider.Auth.Login(model);
+    }
+    [HttpPost("refresh"), EnableRateLimiting("auth")]
+    public Task<LoginResponse> Refresh(RefreshModel model)
+    {
+        return Provider.Auth.Refresh(model.RefreshToken);
+    }
     [HttpGet, Authorize]
-    public Member? GetMember()
+    [HttpGet("me")]
+    public Task<MemberDto> GetMember()
     {
-        string? id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!string.IsNullOrEmpty(id))
-        {
-            return Provider.Member.GetMember(id);
-        }
-        return null;
+        return Provider.Member.GetMember(MemberId);
     }
-    public int Register(Member obj)
+    [HttpPost("logout"), Authorize]
+    public async Task<IActionResult> Logout()
     {
-        if (ModelState.IsValid)
-        {
-            obj.Id = Guid.NewGuid().ToString().Replace("-", string.Empty);
-            obj.Password = BCrypt.Net.BCrypt.HashPassword(obj.Password);
-            return Provider.Member.Add(obj);
-        }
-        return -2;
+        await Provider.Auth.Logout(MemberId, SessionId);
+        return NoContent();
     }
-    public int Add(Member obj)
+    [HttpPost("send-verification-email"), Authorize, EnableRateLimiting("auth")]
+    public async Task<IActionResult> SendVerificationEmail([FromServices] IEmailService emailService)
     {
-        if (ModelState.IsValid)
-        {
-            obj.Id = Guid.NewGuid().ToString().Replace("-", string.Empty);
-            obj.Password = BCrypt.Net.BCrypt.HashPassword(obj.Password);
-            return Provider.Member.Add(obj);
-        }
-        return -2;
+        await Provider.Auth.SendVerificationEmail(MemberId, emailService);
+        return NoContent();
     }
 
-[HttpPost("login")]
-    public LoginResponse? Login(LoginModel obj)
+    [HttpPost("verify-email"), Authorize, EnableRateLimiting("auth")]
+    public async Task<IActionResult> VerifyEmail(EmailOtpModel model)
     {
-        
-        return Provider.Member.Login(obj, HttpContext.RequestServices.GetRequiredService<IConfiguration>());
+        await Provider.Auth.VerifyEmail(MemberId, model.Otp);
+        return NoContent();
+    }
+
+    [HttpPost("forgot-password"), EnableRateLimiting("auth")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model, [FromServices] IEmailService emailService)
+    {
+        await Provider.Auth.ForgotPassword(model.Email, emailService);
+        return NoContent();
+    }
+
+    [HttpPost("reset-password"), EnableRateLimiting("auth")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
+    {
+        await Provider.Auth.ResetPassword(model);
+        return NoContent();
+    }
+
+    [HttpPost("external-login"), EnableRateLimiting("auth")]
+    public async Task<ActionResult<LoginResponse>> ExternalLogin(ExternalLoginModel model,
+        [FromServices] IWebHostEnvironment environment, [FromServices] IConfiguration configuration)
+    {
+        if (!environment.IsDevelopment() || !configuration.GetValue<bool>("AuthDemo:ExternalLogin")) return NotFound();
+        return await Provider.Auth.ExternalLogin(model);
+    }
+
+    [HttpPut("password"), Authorize]
+    public async Task<IActionResult> Password(ChangePasswordModel model)
+    {
+        await Provider.Auth.ChangePassword(MemberId, model);
+        return NoContent();
     }
 }

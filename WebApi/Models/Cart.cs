@@ -1,21 +1,12 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.Models;
 
-[Table("Cart")]
 public class Cart
 {
-    [Column("CartId")]
-
-    public int Id { get; set; }
-
-    public string? MemberId { get; set; }
-
-    public int BikeId {get;set;}
-    
-    public short Quantity {get; set;}
-
-    public Bike? Bike {get; set;}
-
-
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid MemberId
+    { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public byte[] RowVersion { get; set; } = [];
 }
