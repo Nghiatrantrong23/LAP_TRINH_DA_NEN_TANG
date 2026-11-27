@@ -19,6 +19,8 @@ class _HomePageState extends State<HomePage> {
   List<Category> _categories = [];
   List<Product> _products = [];
   int? _categoryId;
+  int _page = 1;
+  int _totalPages = 1;
   int _cartCount = 0;
   String? _email;
   final TextEditingController _searchController = TextEditingController();
@@ -67,12 +69,15 @@ class _HomePageState extends State<HomePage> {
     try {
       final res = await ProductRepository(widget.session.api).getProducts(
         search: _searchController.text.trim(),
-        page: 1,
+        page: _page,
+        pageSize: 6,
         categoryId: _categoryId,
       );
       if (res['items'] is List) {
         setState(() {
           _products = (res['items'] as List).map((e) => Product.fromMap(e)).toList();
+          _totalPages = (res['totalPages'] as int?) ?? 1;
+          if (_totalPages < 1) _totalPages = 1;
         });
       }
     } catch (_) {}
@@ -95,6 +100,7 @@ class _HomePageState extends State<HomePage> {
                   onSelected: (val) {
                     setState(() {
                       _categoryId = val ? p.id : null;
+                      _page = 1;
                     });
                     _loadProducts();
                   },
@@ -195,12 +201,18 @@ class _HomePageState extends State<HomePage> {
                       prefixIcon: Icon(Icons.search, size: 20),
                       isDense: true,
                     ),
-                    onSubmitted: (_) => _loadProducts(),
+                    onSubmitted: (_) {
+                      setState(() => _page = 1);
+                      _loadProducts();
+                    },
                   ),
                 ),
                 const SizedBox(width: 6),
                 ElevatedButton.icon(
-                  onPressed: _loadProducts,
+                  onPressed: () {
+                    setState(() => _page = 1);
+                    _loadProducts();
+                  },
                   label: const Text('Tìm'),
                   icon: const Icon(Icons.search, size: 18),
                 ),
@@ -241,6 +253,30 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: _page > 1
+                    ? () {
+                        setState(() => _page--);
+                        _loadProducts();
+                      }
+                    : null,
+                icon: const Icon(Icons.chevron_left),
+              ),
+              Text('Trang $_page / $_totalPages'),
+              IconButton(
+                onPressed: _page < _totalPages
+                    ? () {
+                        setState(() => _page++);
+                        _loadProducts();
+                      }
+                    : null,
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
           ),
         ],
       ),

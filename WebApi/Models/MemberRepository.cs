@@ -8,7 +8,6 @@ public class MemberRepository : BaseRepository
     {
     }
 
-
     public async Task<MemberDto> GetMember(Guid id)
     {
         var member = await context.Members.AsNoTracking().Include(x => x.Role).SingleOrDefaultAsync(x => x.Id == id) ?? throw new BusinessException(404, "NOT_FOUND", "Không tìm thấy thành viên.");
@@ -25,7 +24,11 @@ public class MemberRepository : BaseRepository
         if (!string.IsNullOrWhiteSpace(search))
         {
             var text = search.Trim();
-            query = query.Where(x => x.Email.Contains(text) || x.GivenName.Contains(text) || x.Surname.Contains(text));
+            query = query.Where(x => x.Email.Contains(text)
+                                  || x.GivenName.Contains(text)
+                                  || x.Surname.Contains(text)
+                                  || (x.Surname + " " + x.GivenName).Contains(text)
+                                  || (x.GivenName + " " + x.Surname).Contains(text));
         }
         var total = await query.CountAsync();
         var members = await query.OrderBy(x => x.NormalizedEmail).ThenBy(x => x.Id).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();

@@ -124,9 +124,23 @@ class _CartPageState extends State<CartPage> {
       ),
     );
     if (confirm == true) {
-      if (!mounted) return;
-      showMessage(context, 'Đặt sân thành công! Nhân viên sẽ liên hệ xác nhận.');
-      _loadCarts();
+      try {
+        final m = widget.session.member;
+        await widget.session.api.call(
+          'POST',
+          '/orders/checkout',
+          body: {
+            'customerName': m?.fullName ?? '',
+            'customerPhone': m?.phone ?? '',
+          },
+        );
+        if (!mounted) return;
+        showMessage(context, 'Đặt sân thành công! Đơn hàng đã được ghi nhận.');
+        _loadCarts();
+      } catch (e) {
+        if (!mounted) return;
+        showMessage(context, e);
+      }
     }
   }
 

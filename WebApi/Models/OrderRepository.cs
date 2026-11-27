@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WebApi.Services;
 
 namespace WebApi.Models;
 
@@ -72,6 +73,82 @@ public class OrderRepository : BaseRepository
 
         var items = await context.OrderItems.AsNoTracking().Where(i => i.OrderId == id).ToListAsync();
         return MapToDto(order, items);
+    }
+
+    public async Task<OrderDto> CheckoutAsync(Guid memberId, string? customerName, string? customerPhone, string? note)
+    {
+        var member = await context.Members.AsNoTracking().FirstOrDefaultAsync(m => m.Id == memberId)
+            ?? throw new BusinessException(404, "NOT_FOUND", "Không tìm thấy thành viên.");
+
+        var cart = await context.Carts.FirstOrDefaultAsync(c => c.MemberId == memberId)
+            ?? throw new BusinessException(400, "EMPTY_CART", "Giỏ hàng trống.");
+
+        var cartItems = await (
+            from ci in context.CartItems
+            join p in context.Products on ci.ProductId equals p.Id
+            where ci.CartId == cart.Id
+            select new { CartItem = ci, Product = p }
+        ).ToListAsync();
+
+        if (!cartItems.Any())
+            throw new BusinessException(400, "EMPTY_CART", "Giỏ hàng trống.");
+
+        var fullName = string.IsNullOrWhiteSpace(customerName)
+            ? $"{member.Surname} {member.GivenName}".Trim()
+            : customerName.Trim();
+        if (string.IsNullOrWhiteSpace(fullName)) fullName = member.Email;
+
+        var phone = string.IsNullOrWhiteSpace(customerPhone)
+            ? (string.IsNullOrWhiteSpace(member.Phone) ? "0900000000" : member.Phone.Trim())
+            : customerPhone.Trim();
+
+        decimal total = cartItems.Sum(x => x.Product.BasePrice * x.CartItem.Quantity);
+        var orderId = Guid.NewGuid();
+        var order = new Order
+        {
+            Id = orderId,
+            OrderCode = $"DH-{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(100, 999)}",
+            MemberId = memberId,
+            VenueId = cartItems[0].Product.VenueId,
+            BookingDate = DateOnly.FromDateTime(DateTime.Now),
+            CustomerName = fullName,
+            CustomerPhone = phone,
+            Status = "PendingDeposit",
+            TotalAmount = total,
+            DepositAmount = 0m,
+            Note = string.IsNullOrWhiteSpace(note) ? null : note.Trim(),
+            IdempotencyKey = Guid.NewGuid().ToString("N"),
+            RequestHash = new byte[32],
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var orderItems = cartItems.Select(x => new OrderItem
+        {
+            OrderId = orderId,
+            ProductId = x.Product.Id,
+            ProductName = x.Product.Name,
+            ProductType = x.Product.Type,
+            Unit = x.Product.Unit,
+            Quantity = x.CartItem.Quantity,
+            UnitPrice = x.Product.BasePrice,
+            LineTotal = x.Product.BasePrice * x.CartItem.Quantity
+        }).ToList();
+
+        context.Orders.Add(order);
+        context.OrderItems.AddRange(orderItems);
+        context.OrderStatusHistories.Add(new OrderStatusHistory
+        {
+            OrderId = orderId,
+            FromStatus = null,
+            ToStatus = "PendingDeposit",
+            ChangedByMemberId = memberId,
+            Reason = "Khách đặt đơn từ giỏ hàng",
+            CreatedAt = DateTime.UtcNow
+        });
+        context.CartItems.RemoveRange(cartItems.Select(x => x.CartItem));
+
+        await context.SaveChangesAsync();
+        return MapToDto(order, orderItems);
     }
 
     public async Task<int> UpdateStatusAsync(Guid orderId, string newStatus, Guid? changedBy, string? reason)

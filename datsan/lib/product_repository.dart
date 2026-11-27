@@ -7,6 +7,7 @@ class ProductRepository {
   Future<Map<String, dynamic>> getProducts({
     String search = '',
     int page = 1,
+    int pageSize = 20,
     int? categoryId,
     bool admin = false,
   }) async {
@@ -14,7 +15,7 @@ class ProductRepository {
     final catParam = categoryId != null ? '&categoryId=$categoryId' : '';
     return await api.call(
       'GET',
-      '$base?search=${Uri.encodeQueryComponent(search)}&pageIndex=$page&pageSize=20$catParam',
+      '$base?search=${Uri.encodeQueryComponent(search)}&pageIndex=$page&pageSize=$pageSize$catParam',
     );
   }
 

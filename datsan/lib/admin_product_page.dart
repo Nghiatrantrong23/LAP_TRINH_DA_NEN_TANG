@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'product.dart';
 import 'product_repository.dart';
 import 'product_edit_page.dart';
+import 'category.dart';
+import 'category_repository.dart';
 import 'session_helper.dart';
 import 'helper.dart';
 import 'catalog_image.dart';
@@ -16,15 +17,27 @@ class AdminProductPage extends StatefulWidget {
 
 class _AdminProductPageState extends State<AdminProductPage> {
   late ProductRepository repository;
+  late CategoryRepository categoryRepository;
   late Future<dynamic> data;
   final search = TextEditingController();
+  List<Category> categories = [];
+  int? selectedCategoryId;
   int page = 1;
   bool busy = false;
   @override
   void initState() {
     super.initState();
     repository = ProductRepository(widget.session.api);
+    categoryRepository = CategoryRepository(widget.session.api);
+    _loadCategories();
     reload();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final list = await categoryRepository.getOptions();
+      if (mounted) setState(() => categories = list);
+    } catch (_) {}
   }
 
   @override
@@ -34,7 +47,13 @@ class _AdminProductPageState extends State<AdminProductPage> {
   }
 
   void reload() {
-    data = repository.getProducts(search: search.text, page: page, admin: true);
+    data = repository.getProducts(
+      search: search.text,
+      page: page,
+      pageSize: 6,
+      categoryId: selectedCategoryId,
+      admin: true,
+    );
   }
 
   Future<void> edit([int? id]) async {
@@ -114,7 +133,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: TextField(
                 controller: search,
                 onSubmitted: (_) => setState(() {
@@ -133,6 +152,40 @@ class _AdminProductPageState extends State<AdminProductPage> {
                 ),
               ),
             ),
+            if (categories.isNotEmpty)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: const Text('Tất cả'),
+                        selected: selectedCategoryId == null,
+                        onSelected: (_) => setState(() {
+                          selectedCategoryId = null;
+                          page = 1;
+                          reload();
+                        }),
+                      ),
+                    ),
+                    for (final c in categories)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(c.name),
+                          selected: selectedCategoryId == c.id,
+                          onSelected: (_) => setState(() {
+                            selectedCategoryId = c.id;
+                            page = 1;
+                            reload();
+                          }),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             if (busy) const LinearProgressIndicator(),
             Expanded(
               child: RequestView(
